@@ -1,0 +1,76 @@
+package com.afrudeen.product.service.impl;
+
+import com.afrudeen.product.dto.ProductRequest;
+import com.afrudeen.product.entity.Product;
+import com.afrudeen.product.repository.ProductRepository;
+import com.afrudeen.product.service.ProductService;
+import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class ProductServiceImpl implements ProductService {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductService.class);
+
+    private final ProductRepository productRepository;
+
+    public ProductServiceImpl(ProductRepository productRepository) {
+        this.productRepository = productRepository;
+    }
+
+    @Override
+    public Product create(ProductRequest productRequest) {
+
+        Product saved = productRepository
+                .save(new Product(productRequest.name(),
+                        productRequest.price(),
+                        productRequest.stock()));
+
+        log.info("Created product {}", saved.getDisplayName());
+        return saved;
+
+    }
+
+    @Override
+    public List<Product> findAll(String search) {
+
+        if (search == null || search.isBlank())
+            return productRepository.findAll();
+
+        return productRepository.findByNameContainingIgnoreCase(search);
+    }
+
+    @Override
+    public Product findById(Long id) {
+
+        return productRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id " + id));
+    }
+
+    @Override
+    public Product update(Long id, ProductRequest productRequest) {
+
+        Product product = findById(id);
+        product.setName(productRequest.name());
+        product.setPrice(productRequest.price());
+        product.setStock(productRequest.stock());
+        return product;
+    }
+
+    @Override
+    public void delete(Long id) {
+
+        Product product = productRepository.findByIdAndIsActive(id,true)
+                .orElseThrow(()->
+                        new EntityNotFoundException("Product not found"));
+
+        product.setIsActive(false);
+
+        productRepository.save(product);
+
+    }
+}
