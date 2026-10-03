@@ -37,3 +37,27 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      productService:
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 6 # Look at the last 6 calls
+        minimum-number-of-calls: 4 # Need 4 calls before judging
+        failure-rate-threshold: 50 # >= 50% failures -> OPEN
+        wait-duration-in-open-state: 10s # Stay OPEN for 10 seconds
+        permitted-number-of-calls-in-half-open-state: 2
+        automatic-transition-from-open-to-half-open-enabled: true
+        register-health-indicator: true
+        ignore-exceptions:
+          - com.afrudeen.order.common.ResourceNotFoundException
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,circuitbreakers,circuitbreakerevents
+  health:
+    circuitbreakers:
+      enabled: true

@@ -9,5 +9,7 @@ import org.springframework.web.bind.annotation.*;
 public interface ProductClient {
 
     @GetMapping("/products/{id}")
-    BaseResponse<ProductResponse> findById(@PathVariable("id") Long id);
+    BaseResponse<ProductResponse> findById(
+            @PathVariable("id") Long id
+    );
 }
