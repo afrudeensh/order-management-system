@@ -8,6 +8,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -52,25 +53,22 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public Product update(Long id, ProductRequest productRequest) {
 
         Product product = findById(id);
         product.setName(productRequest.name());
         product.setPrice(productRequest.price());
         product.setStock(productRequest.stock());
-        return product;
+        return productRepository.save(product);
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
-
-        Product product = productRepository.findByIdAndIsActive(id,true)
-                .orElseThrow(()->
-                        new EntityNotFoundException("Product not found"));
-
+        Product product = productRepository.findByIdAndIsActive(id, true)
+                .orElseThrow(() -> new EntityNotFoundException("Product not found with id " + id));
         product.setIsActive(false);
-
         productRepository.save(product);
-
     }
 }
