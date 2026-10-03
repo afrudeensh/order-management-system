@@ -1,5 +1,6 @@
 package com.afrudeen.product.controller;
 
+import com.afrudeen.product.common.BaseResponse;
 import com.afrudeen.product.dto.ProductRequest;
 import com.afrudeen.product.entity.Product;
 import com.afrudeen.product.service.ProductService;
@@ -25,33 +26,33 @@ public class ProductController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a product")
-    public Product create(@Valid @RequestBody ProductRequest request) {
-        return service.create(request);
+    public BaseResponse<Product> create(@Valid @RequestBody ProductRequest request) {
+        return BaseResponse.created(service.create(request));
     }
 
     @GetMapping
     @Operation(summary = "List products, optionally filtered by name")
-    public List<Product> findAll(@RequestParam(required = false) String search) {
-        return service.findAll(search);
+    public BaseResponse<List<Product>> findAll(@RequestParam(required = false) String search) {
+        return BaseResponse.ok(service.findAll(search));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get one product")
-    public Product findById(@PathVariable Long id) {
-        return service.findById(id);
+    public BaseResponse<Product> findById(@PathVariable Long id) {
+        return BaseResponse.ok(service.findById(id));
     }
-
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a product")
-    public Product update(@PathVariable Long id, @Valid @RequestBody ProductRequest request) {
-        return service.update(id, request);
+    public BaseResponse<Product> update(@PathVariable Long id,
+                                        @Valid @RequestBody ProductRequest request) {
+        return BaseResponse.ok("Product updated", service.update(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete a product")
-    public void delete(@PathVariable Long id) {
+    public BaseResponse<Void> delete(@PathVariable Long id) {
         service.delete(id);
+        return BaseResponse.ok("Product deleted", null);
     }
 }

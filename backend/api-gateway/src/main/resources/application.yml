@@ -1,53 +1,55 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: api-gateway
   cloud:
-     gateway:
-       server:
-         webflux: # Spring Cloud 2025.0.x property prefix
-            discovery:
-               locator:
-                  enabled: true # auto routes /<service-id>/** (used for Swagger below)
-                  lower-case-service-id: true
-            routes:
-             - id: user-service
-               uri: lb://USER-SERVICE
-               predicates:
-               - Path=/users/**
-             - id: product-service
-               uri: lb://PRODUCT-SERVICE
-               predicates:
-               - Path=/products/**
-             - id: order-service
-               uri: lb://ORDER-SERVICE
-               predicates:
-               - Path=/orders/**
-             - id: notification-service
-               uri: lb://NOTIFICATION-SERVICE
-               predicates:
-               - Path=/notifications/**
-         globalcors:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+          routes:
+            - id: user-service
+              uri: lb://USER-SERVICE
+              predicates:
+                - Path=/users/**
+            - id: product-service
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/products/**
+            - id: order-service
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/orders/**
+            - id: notification-service
+              uri: lb://NOTIFICATION-SERVICE
+              predicates:
+                - Path=/notifications/**
+          globalcors:
             cors-configurations:
-               '[/**]':
-               allowedOrigins: "http://localhost:4200"
-               allowedMethods: [GET, POST, PUT, DELETE, OPTIONS]
-               allowedHeaders: [Authorization, Content-Type]
-server:
-  port: 8080
+              '[/**]':
+                allowedOrigins: "http://localhost:4200"
+                allowedMethods: [GET, POST, PUT, PATCH, DELETE, OPTIONS]
+                allowedHeaders: [Authorization, Content-Type]
+                maxAge: 3600
 
 eureka:
   client:
-     service-url:
-         defaultZone: http://localhost:8761/eureka/
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
 
 jwt:
-   secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET}
 
 springdoc:
-   swagger-ui:
-     urls:
+  swagger-ui:
+    urls:
       - name: user-service
-        url: user-service/v3/api-docs
+        url: /user-service/v3/api-docs
       - name: product-service
         url: /product-service/v3/api-docs
       - name: order-service
