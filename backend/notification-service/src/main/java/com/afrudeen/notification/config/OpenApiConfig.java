@@ -1,4 +1,4 @@
-package com.afrudeen.product.common;
+package com.afrudeen.notification.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

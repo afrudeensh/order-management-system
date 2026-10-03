@@ -4,6 +4,8 @@ spring:
 server:
   port: 8761
 eureka:
+  instance:
+    hostname: localhost
   client:
    register-with-eureka: false # the server does not register with itself
    fetch-registry: false
