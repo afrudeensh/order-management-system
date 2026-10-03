@@ -1,0 +1,9 @@
+# Ignore rules for the project
+.idea/
+*.iml
+target/
+dist/
+.angular/
+node_modules/
+*.log
+.env
