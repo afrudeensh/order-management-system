@@ -1,33 +1,13 @@
-@if (auth.isLoggedIn()) { 
-  <mat-toolbar color="primary" class="nav">
-     <mat-icon>inventory_2</mat-icon>
+@if (auth.isLoggedIn()) {
+  <mat-toolbar class="nav">
+    <mat-icon>inventory_2</mat-icon>
+    <span class="brand">Order Management</span>
 
-      <span class="brand">Order Management</span>
-      
-      <a 
-        mat-button
-        routerLink="/dashboard"
-        routerLinkActive="active"
-       >
-        Dashboard
-        </a>
-
-      <a
-        mat-button
-        routerLink="/products"
-        routerLinkActive="active"
-       >
-        Products
-         </a>
-         
-      <a 
-        mat-button
-        routerLink="/orders"
-        routerLinkActive="active"
-       >
-        Orders
-         </a>
-         
+    <!-- Wide screens: links in the bar -->
+    <nav class="desktop-links">
+      <a mat-button routerLink="/dashboard" routerLinkActive="active">Dashboard</a>
+      <a mat-button routerLink="/products" routerLinkActive="active">Products</a>
+      <a mat-button routerLink="/orders" routerLinkActive="active">Orders</a>
       <a
         mat-button
         routerLink="/notifications"
@@ -36,25 +16,66 @@
         [matBadgeHidden]="store.unread() === 0"
         matBadgeDescription="Unread notifications"
       >
-      Notifications
-     </a>
-         
-      <span class="spacer"></span> 
+        Notifications
+      </a>
+    </nav>
 
-      <span class="who"> 
-        {{ auth.user()?.name }}
-        ({{ auth.user()?.role }})
-       </span> 
+    <span class="spacer"></span>
 
-      <button
-        mat-stroked-button
-         (click)="auth.logout()"
-       >
-       Logout 
-      </button> 
-      </mat-toolbar>
- }
- 
+    <span class="who">
+      <span class="avatar">{{ auth.user()?.name?.charAt(0) | uppercase }}</span>
+      <span class="name">{{ auth.user()?.name | titlecase }}</span>
+
+      @if (auth.isAdmin()) {
+        <span class="role-chip">Admin</span>
+      }
+    </span>
+
+    <button mat-stroked-button class="logout-desktop" (click)="auth.logout()">
+      Logout
+    </button>
+
+    <!-- Narrow screens: hamburger menu -->
+    <button
+      mat-icon-button
+      class="menu-btn"
+      [matMenuTriggerFor]="menu"
+      aria-label="Open menu"
+      [matBadge]="store.unread()"
+      [matBadgeHidden]="store.unread() === 0"
+      matBadgeSize="small"
+    >
+      <mat-icon>menu</mat-icon>
+    </button>
+
+    <mat-menu #menu="matMenu">
+      <a mat-menu-item routerLink="/dashboard">
+        <mat-icon>dashboard</mat-icon>
+        <span>Dashboard</span>
+      </a>
+      <a mat-menu-item routerLink="/products">
+        <mat-icon>inventory</mat-icon>
+        <span>Products</span>
+      </a>
+      <a mat-menu-item routerLink="/orders">
+        <mat-icon>receipt_long</mat-icon>
+        <span>Orders</span>
+      </a>
+      <a mat-menu-item routerLink="/notifications">
+        <mat-icon>notifications</mat-icon>
+        <span>
+          Notifications
+          @if (store.unread() > 0) { ({{ store.unread() }}) }
+        </span>
+      </a>
+      <button mat-menu-item (click)="auth.logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  </mat-toolbar>
+}
+
 <main class="page">
-   <router-outlet />
+  <router-outlet />
 </main>

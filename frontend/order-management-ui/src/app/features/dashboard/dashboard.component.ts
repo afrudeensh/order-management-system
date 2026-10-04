@@ -17,12 +17,14 @@ import {
 } from '../../core/api.service';
 
 import { AuthService } from '../../core/auth.service';
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'app-dashboard',
   imports: [
     MatCardModule,
     RouterLink,
+    TitleCasePipe,
   ],
   templateUrl: './dashboard.component.html',
 })

@@ -1,106 +1,72 @@
 <h2>Products</h2>
 
-@if (auth.isAdmin()) {
-  <a
-    mat-flat-button
-    color="primary"
-    routerLink="/products/new"
-  >
-    <mat-icon>add</mat-icon>
-    Add product
-  </a>
-}
+<div class="row between">
+  <mat-form-field appearance="outline" class="search">
+    <mat-label>Search by name</mat-label>
+    <input matInput [formControl]="search" />
+  </mat-form-field>
 
-<mat-form-field appearance="outline">
-  <mat-label>Search by name</mat-label>
-
-  <input
-    matInput
-    [formControl]="search"
-  />
-</mat-form-field>
+  @if (auth.isAdmin()) {
+    <a mat-flat-button routerLink="/products/new">
+      <mat-icon>add</mat-icon>
+      Add product
+    </a>
+  }
+</div>
 
 @if (loading()) {
   <mat-spinner diameter="36"></mat-spinner>
 }
 
 @if (error()) {
-  <p class="error">
-    {{ error() }}
-  </p>
+  <p class="error">{{ error() }}</p>
 }
 
-<table
-  mat-table
-  [dataSource]="products()"
->
-  <ng-container matColumnDef="name">
-    <th mat-header-cell *matHeaderCellDef>
-      Product
-    </th>
+<div class="table-wrap">
+  <table mat-table [dataSource]="products()">
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Product</th>
+      <td mat-cell *matCellDef="let p">{{ p.name }}</td>
+    </ng-container>
 
-    <td mat-cell *matCellDef="let p">
-      {{ p.name }}
-    </td>
-  </ng-container>
+    <ng-container matColumnDef="price">
+      <th mat-header-cell *matHeaderCellDef>Price</th>
+      <td mat-cell *matCellDef="let p">{{ p.price | currency: 'INR' }}</td>
+    </ng-container>
 
-  <ng-container matColumnDef="price">
-    <th mat-header-cell *matHeaderCellDef>
-      Price
-    </th>
+    <ng-container matColumnDef="stock">
+      <th mat-header-cell *matHeaderCellDef>Stock</th>
+      <td mat-cell *matCellDef="let p">{{ p.stock }}</td>
+    </ng-container>
 
-    <td mat-cell *matCellDef="let p">
-      {{ p.price | currency: 'INR' }}
-    </td>
-  </ng-container>
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>Actions</th>
+      <td mat-cell *matCellDef="let p">
+        @if (auth.isAdmin()) {
+          <a
+            mat-icon-button
+            [routerLink]="['/products', p.id, 'edit']"
+            aria-label="Edit product"
+          >
+            <mat-icon>edit</mat-icon>
+          </a>
 
-  <ng-container matColumnDef="stock">
-    <th mat-header-cell *matHeaderCellDef>
-      Stock
-    </th>
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="remove(p)"
+            aria-label="Delete product"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        }
+      </td>
+    </ng-container>
 
-    <td mat-cell *matCellDef="let p">
-      {{ p.stock }}
-    </td>
-  </ng-container>
-
-  <ng-container matColumnDef="actions">
-    <th mat-header-cell *matHeaderCellDef>
-      Actions
-    </th>
-
-    <td mat-cell *matCellDef="let p">
-      @if (auth.isAdmin()) {
-        <a
-          mat-icon-button
-          [routerLink]="['/products', p.id, 'edit']"
-          aria-label="Edit product"
-        >
-          <mat-icon>edit</mat-icon>
-        </a>
-
-        <button
-          mat-icon-button
-          color="warn"
-          (click)="remove(p)"
-          aria-label="Delete product"
-        >
-          <mat-icon>delete</mat-icon>
-        </button>
-      }
-    </td>
-  </ng-container>
-
-  <tr
-    mat-header-row
-    *matHeaderRowDef="cols"
-  ></tr>
-
-  <tr
-    mat-row
-    *matRowDef="let row; columns: cols"
-  ></tr>
-</table>
+    <tr mat-header-row *matHeaderRowDef="cols"></tr>
+    <tr mat-row *matRowDef="let row; columns: cols"></tr>
+  </table>
+</div>
 
 @if (!loading() && products().length === 0) {
   <p>No products found.</p>

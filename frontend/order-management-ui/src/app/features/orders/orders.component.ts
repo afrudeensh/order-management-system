@@ -1,11 +1,11 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, viewChild } from '@angular/core';
 import {
   CurrencyPipe,
   DatePipe,
 } from '@angular/common';
 import {
-  FormArray,
   FormBuilder,
+  FormGroupDirective,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -53,6 +53,9 @@ export class OrdersComponent {
   private snack = inject(MatSnackBar);
   private notificationStore = inject(NotificationStore);
 
+  // The <form [formGroup]> in the template, used to clear the "submitted" state
+  private formDir = viewChild(FormGroupDirective);
+
   products = signal<Product[]>([]);
   orders = signal<Order[]>([]);
 
@@ -70,16 +73,7 @@ export class OrdersComponent {
   }
 
   constructor() {
-    this.productApi.getAll().subscribe({
-      next: (products) => {
-        this.products.set(products);
-      },
-
-      error: (err) => {
-        this.error.set(errorMessage(err));
-      },
-    });
-
+    this.loadProducts();
     this.loadOrders();
   }
 
@@ -110,6 +104,18 @@ export class OrdersComponent {
     this.form.controls.lines.removeAt(index);
   }
 
+  loadProducts(): void {
+    this.productApi.getAll().subscribe({
+      next: (products) => {
+        this.products.set(products);
+      },
+
+      error: (err) => {
+        this.error.set(errorMessage(err));
+      },
+    });
+  }
+
   loadOrders(): void {
     this.orderApi.mine().subscribe({
       next: (orders) => {
@@ -119,16 +125,6 @@ export class OrdersComponent {
       error: (err) => {
         this.error.set(errorMessage(err));
       },
-    });
-  }
-
-  loadProducts(): void {
-  this.productApi.getAll().subscribe({
-    next: (products) =>
-         this.products.set(products),
-
-    error: (err) =>
-         this.error.set(errorMessage(err)),
     });
   }
 
@@ -158,12 +154,16 @@ export class OrdersComponent {
           },
         );
 
+        // Back to a single empty line
         this.form.setControl(
           'lines',
           this.fb.array([
             this.newLine(),
           ]),
         );
+
+        // Clear the "submitted" state so the Product field is not red
+        this.formDir()?.resetForm();
 
         this.placing.set(false);
 
