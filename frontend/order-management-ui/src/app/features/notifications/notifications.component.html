@@ -7,7 +7,7 @@
   ) {
     <mat-list-item>
       <mat-icon matListItemIcon>
-        notifications
+        {{ notification.message.startsWith('Low stock') ? 'warning' : 'notifications' }}
       </mat-icon>
 
       <div matListItemTitle>

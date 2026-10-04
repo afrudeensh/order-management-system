@@ -16,7 +16,8 @@ public abstract class NotificationHandler<E> {
     /** TEMPLATE METHOD: fixed steps, cannot be overridden. */
     public final void handle(E event) {
         validate(event);
-        Notification n = new Notification(userIdOf(event), orderIdOf(event), buildMessage(event));
+        Notification n = new Notification(userIdOf(event), orderIdOf(event),
+                buildMessage(event), audienceOf(event));
         afterSave(repository.save(n));
     }
 
@@ -31,5 +32,9 @@ public abstract class NotificationHandler<E> {
     }
     protected void afterSave(Notification saved) {
         log.info("Saved: {}", saved.getDisplayName());
+    }
+
+    protected String audienceOf(E event) {
+        return "USER";   // default: a normal customer notification
     }
 }

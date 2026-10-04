@@ -15,9 +15,9 @@ import {
 
 import { AuthService } from '../../core/auth.service';
 import { Product } from '../../core/models';
+import { LOW_STOCK_LIMIT } from '../../core/config';
 
 // A product with fewer units than this counts as "low stock"
-const LOW_STOCK_LIMIT = 15;
 
 @Component({
   selector: 'app-dashboard',

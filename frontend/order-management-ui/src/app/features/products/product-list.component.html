@@ -35,14 +35,31 @@
     </ng-container>
 
     <ng-container matColumnDef="stock">
-      <th mat-header-cell *matHeaderCellDef>Stock</th>
-      <td mat-cell *matCellDef="let p">{{ p.stock }}</td>
-    </ng-container>
+  <th mat-header-cell *matHeaderCellDef>Stock</th>
+  <td mat-cell *matCellDef="let p">
+    @if (p.stock === 0) {
+      <span class="stock-chip out">Out of stock</span>
+    } @else if (p.stock < lowLimit) {
+      <span class="stock-chip">{{ p.stock }} · Low</span>
+    } @else {
+      {{ p.stock }}
+    }
+  </td>
+</ng-container>
 
     <ng-container matColumnDef="actions">
       <th mat-header-cell *matHeaderCellDef>Actions</th>
       <td mat-cell *matCellDef="let p">
         @if (auth.isAdmin()) {
+
+        <button
+            mat-icon-button
+            (click)="addStock(p)"
+            title="Add stock"
+            aria-label="Add stock"
+         >
+        <mat-icon>add_box</mat-icon>
+        </button>
           <a
             mat-icon-button
             [routerLink]="['/products', p.id, 'edit']"

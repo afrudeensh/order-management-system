@@ -27,6 +27,11 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product create(ProductRequest productRequest) {
 
+        String name = productRequest.name().trim();
+        if (productRepository.existsByNameIgnoreCase(name)) {
+            throw new BusinessException("A product named \"" + name + "\" already exists");
+        }
+
         Product saved = productRepository
                 .save(new Product(productRequest.name(),
                         productRequest.price(),
@@ -57,10 +62,13 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public Product update(Long id, ProductRequest productRequest) {
 
+        String name = productRequest.name().trim();
+        if (productRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
+            throw new BusinessException("A product named \"" + name + "\" already exists");
+        }
         Product product = findById(id);
         product.setName(productRequest.name());
         product.setPrice(productRequest.price());
-        product.setStock(productRequest.stock());
         return productRepository.save(product);
     }
 
@@ -82,8 +90,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Transactional
-    public void increaseStock(Long id, int qty) {
-        findById(id);                       // 404 if the product is gone
-        productRepository.increaseStock(id, qty);
+    public Product increaseStock(Long id, int qty) {
+        if (qty <= 0) {
+            throw new BusinessException("Quantity must be at least 1");
+        }
+        findById(id);                            // 404 if missing
+        productRepository.increaseStock(id, qty);       // atomic: stock = stock + qty
+        return findById(id);                     // fresh row with the new stock
     }
 }

@@ -25,8 +25,12 @@ public class NotificationController {
 
     @GetMapping("/my")
     @Operation(summary = "My notifications, newest first")
-    public List<Notification> mine(@RequestHeader("X-User-Id") Long userId) {
-        return repository.findByUserIdOrderByCreatedAtDesc(userId);
+    public List<Notification> mine(@RequestHeader("X-User-Id") Long userId,
+                                   @RequestHeader("X-User-Role") String role) {
+        if ("ADMIN".equals(role)) {
+            return repository.findByAudienceOrderByCreatedAtDesc("ADMIN");
+        }
+        return repository.findByUserIdAndAudienceNotOrderByCreatedAtDesc(userId, "ADMIN");
     }
 
 }

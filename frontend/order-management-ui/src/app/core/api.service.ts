@@ -43,6 +43,14 @@ export class ProductApi {
   delete(id: number) {
     return this.http.delete<void>(`${this.url}/${id}`);
   }
+
+  addStock(id: number, quantity: number) {
+  return this.http.put<Product>(
+    `${API_URL}/products/${id}/stock/increase`,
+    null,
+    { params: { quantity } },
+  );
+}
 }
 
 @Injectable({

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,6 +28,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository repository;
     private final ProductGateway products;
     private final OrderEventPublisher events;
+    private static final int LOW_STOCK_LIMIT = 15;
 
 
     public OrderServiceImpl(OrderRepository repository, ProductGateway products, OrderEventPublisher events) {
@@ -40,12 +42,19 @@ public class OrderServiceImpl implements OrderService {
         Order order = new Order(userId);
         BigDecimal total = BigDecimal.ZERO;
 
+        List<String> lowStock = new ArrayList<>();
+
         for (OrderItemRequest line : request.items()) {
             ProductResponse p = products.getProduct(line.productId()); // sync call
             System.out.println("PRODUCT RESPONSE = " + p);
 
             if (p.stock() < line.quantity()) {
                 throw new BusinessException("Insufficient stock for " + p.name());
+            }
+
+            int remaining = p.stock() - line.quantity();
+            if (remaining < LOW_STOCK_LIMIT) {
+                lowStock.add("%s (%d left)".formatted(p.name(), remaining));
             }
 
             order.addItem(new OrderItem(p.id(), p.name(), line.quantity(), p.price()));
@@ -60,7 +69,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         events.publish(new OrderCreatedEvent(saved.getId(), saved.getUserId(),
-                saved.getTotalAmount(), saved.getCreatedAt()));
+                saved.getTotalAmount(), saved.getCreatedAt(), lowStock));
         return OrderResponse.from(saved);
 
     }

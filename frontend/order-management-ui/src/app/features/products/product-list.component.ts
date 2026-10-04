@@ -14,6 +14,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { AddStockDialogComponent } from '../../shared/add-stock-dialog.component';
 
 import {
   catchError,
@@ -30,6 +32,7 @@ import { ProductApi } from '../../core/api.service';
 import { errorMessage } from '../../core/http-error';
 import { Product } from '../../core/models';
 import { ConfirmService } from '../../shared/confirm-dialog.component';
+import { LOW_STOCK_LIMIT } from '../../core/config';
 
 @Component({
   selector: 'app-product-list',
@@ -43,6 +46,7 @@ import { ConfirmService } from '../../shared/confirm-dialog.component';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
+    MatDialogModule,
   ],
   templateUrl: './product-list.component.html',
 })
@@ -53,6 +57,8 @@ export class ProductListComponent {
   private snack = inject(MatSnackBar);
   private confirmDialog = inject(ConfirmService);
 
+  lowLimit = LOW_STOCK_LIMIT;
+
   search = new FormControl('', {
     nonNullable: true,
   });
@@ -62,6 +68,7 @@ export class ProductListComponent {
   error = signal('');
 
   cols = ['name', 'price', 'stock', 'actions'];
+    dialog: any;
 
   constructor() {
     this.search.valueChanges
@@ -119,6 +126,34 @@ export class ProductListComponent {
         error: (err) => {
           this.snack.open(errorMessage(err), 'OK', { duration: 4000 });
         },
+      });
+    });
+}
+
+addStock(product: Product): void {
+  this.dialog
+    .open(AddStockDialogComponent, {
+      data: { name: product.name, current: product.stock },
+      width: '380px',
+      maxWidth: '92vw',
+    })
+    .afterClosed()
+    .subscribe((qty: number) => {
+      if (!qty) return;
+
+      this.api.addStock(product.id, qty).subscribe({
+        next: (updated) => {
+          this.products.update((list) =>
+            list.map((p) => (p.id === updated.id ? updated : p)),
+          );
+          this.snack.open(
+            `Added ${qty} to ${updated.name}. Stock is now ${updated.stock}`,
+            'OK',
+            { duration: 3000 },
+          );
+        },
+        error: (err) =>
+          this.snack.open(errorMessage(err), 'OK', { duration: 4000 }),
       });
     });
 }

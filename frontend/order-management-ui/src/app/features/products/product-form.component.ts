@@ -63,6 +63,7 @@ export class ProductFormComponent {
 
   constructor() {
     if (this.id) {
+      this.form.controls.stock.disable();
       this.api.get(this.id).subscribe({
         next: (product) => {
           this.form.patchValue(product);

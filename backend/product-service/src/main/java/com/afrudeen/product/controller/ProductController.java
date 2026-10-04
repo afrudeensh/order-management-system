@@ -62,7 +62,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}/stock/increase")
-    public void increaseStock(@PathVariable Long id, @RequestParam int quantity) {
-        service.increaseStock(id, quantity);
+    public Product increaseStock(@PathVariable Long id, @RequestParam int quantity) {
+        return service.increaseStock(id, quantity);
     }
 }

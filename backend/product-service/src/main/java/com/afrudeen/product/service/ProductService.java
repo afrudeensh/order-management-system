@@ -19,5 +19,5 @@ public interface ProductService {
 
     void decreaseStock(Long id, int qty);
 
-    void increaseStock(Long id, int qty);
+    Product increaseStock(Long id, int qty);
 }

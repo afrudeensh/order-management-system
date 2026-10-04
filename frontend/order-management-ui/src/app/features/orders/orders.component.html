@@ -12,7 +12,7 @@
 
                 <mat-select formControlName="productId">
                   @for (product of products(); track product.id) {
-                    <mat-option [value]="product.id">
+                    <mat-option [value]="product.id" [disabled]="product.stock === 0">
                       {{ product.name }}
                       -
                       {{ product.price | currency: 'INR' }}
