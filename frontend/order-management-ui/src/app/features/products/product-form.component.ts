@@ -62,7 +62,9 @@ export class ProductFormComponent {
       this.api.get(this.id).subscribe({
         next: (product) => {
           this.form.patchValue({
-            ...product,
+            name: product.name,
+            price: product.price,
+            stock: product.stock,
             image: product.image ?? null,
             color: product.color ?? null,
           });

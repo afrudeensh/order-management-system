@@ -1,11 +1,11 @@
 package com.afrudeen.product.service.impl;
 
 import com.afrudeen.product.common.BusinessException;
+import com.afrudeen.product.common.ResourceNotFoundException;
 import com.afrudeen.product.dto.ProductRequest;
 import com.afrudeen.product.entity.Product;
 import com.afrudeen.product.repository.ProductRepository;
 import com.afrudeen.product.service.ProductService;
-import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private static final Logger log = LoggerFactory.getLogger(ProductService.class);
+    private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
 
     private final ProductRepository productRepository;
 
@@ -25,81 +25,99 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Product create(ProductRequest productRequest) {
+    @Transactional
+    public Product create(ProductRequest request) {
+        String name = request.name().trim();
 
-        String name = productRequest.name().trim();
         if (productRepository.existsByNameIgnoreCase(name)) {
             throw new BusinessException("A product named \"" + name + "\" already exists");
         }
 
-        Product saved = productRepository
-                .save(new Product(productRequest.name(),
-                        productRequest.price(),
-                        productRequest.stock(),
-                        productRequest.image(),
-                        productRequest.color()));
+        Product saved = productRepository.save(new Product(
+                name,
+                request.price(),
+                request.stock(),
+                request.image(),
+                request.color()));
 
         log.info("Created product {}", saved.getDisplayName());
         return saved;
-
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<Product> findAll(String search) {
-
-        if (search == null || search.isBlank())
-            return productRepository.findAll();
-
-        return productRepository.findByNameContainingIgnoreCase(search);
+        if (search == null || search.isBlank()) {
+            return productRepository.findByIsActiveTrue();
+        }
+        return productRepository.findByIsActiveTrueAndNameContainingIgnoreCase(search.trim());
     }
 
+    /** Active products only, so a deleted product can no longer be sold. */
     @Override
+    @Transactional(readOnly = true)
     public Product findById(Long id) {
-
-        return productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id " + id));
+        return productRepository.findByIdAndIsActive(id, true)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id " + id));
     }
 
     @Override
     @Transactional
-    public Product update(Long id, ProductRequest productRequest) {
+    public Product update(Long id, ProductRequest request) {
+        String name = request.name().trim();
+        Product product = findById(id);
 
-        String name = productRequest.name().trim();
-        if (productRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
+        // Only check for duplicates when the name itself is being changed
+        boolean renamed = !product.getName().equalsIgnoreCase(name);
+        if (renamed && productRepository.existsByNameIgnoreCase(name)) {
             throw new BusinessException("A product named \"" + name + "\" already exists");
         }
-        Product product = findById(id);
-        product.setName(productRequest.name());
-        product.setPrice(productRequest.price());
-        product.setImage(productRequest.image());
-        product.setColor(productRequest.color());
+
+        product.setName(name);
+        product.setPrice(request.price());
+        product.setImage(request.image());
+        product.setColor(request.color());
+        // stock is NOT changed here: use increaseStock or the order flow
         return productRepository.save(product);
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
-        Product product = productRepository.findByIdAndIsActive(id, true)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id " + id));
+        Product product = findById(id);
         product.setIsActive(false);
+        // free the name, so the unique constraint doesn't block re-creating it later
+        product.setName(product.getName() + " [deleted #" + id + "]");
         productRepository.save(product);
     }
 
+    @Override
     @Transactional
     public void decreaseStock(Long id, int qty) {
-        findById(id);   // throws 404 if the product doesn't exist
+        if (qty <= 0) {
+            throw new BusinessException("Quantity must be at least 1");
+        }
+        findById(id);   // 404 if the product doesn't exist or was deleted
         if (productRepository.decreaseStock(id, qty) == 0) {
             throw new BusinessException("Insufficient stock for product " + id);
         }
     }
 
+    @Override
     @Transactional
     public Product increaseStock(Long id, int qty) {
         if (qty <= 0) {
             throw new BusinessException("Quantity must be at least 1");
         }
-        findById(id);                            // 404 if missing
-        productRepository.increaseStock(id, qty);       // atomic: stock = stock + qty
-        return findById(id);                     // fresh row with the new stock
+        // Deleted products are allowed here, so cancelling an old order
+        // that contains one can still return its stock.
+        getAny(id);
+        productRepository.increaseStock(id, qty);   // atomic: stock = stock + qty
+        return getAny(id);                          // fresh row
+    }
+
+    private Product getAny(Long id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id " + id));
     }
 }

@@ -170,32 +170,73 @@ mat-card { border-radius: var(--radius); }
   padding: 16px;
 }
 
-/* FIX: gap between "Sign in" title and the Email field.
-   Header must size to its content, and the content needs top space
-   because outline labels float above the field's top border. */
+/* Header sizes to its content; content gets top space because
+   outline labels float above the field's top border. */
 .auth-card .mat-mdc-card-header {
   height: auto;
   min-height: 0;
   padding-bottom: 8px;
 }
 
-.auth-card .mat-mdc-card-content {
-  padding-top: 16px;
-}
+.auth-card .mat-mdc-card-content { padding-top: 16px; }
+.auth-card .mat-mdc-card-title { margin: 0; }
+.auth-card mat-card-actions { padding: 0 16px 16px; }
 
-.auth-card .mat-mdc-card-title {
-  margin: 0;
-}
-
-.auth-card mat-card-actions {
-  padding: 0 16px 16px;
-}
-
-/* ---------- Form card ---------- */
+/* ---------- Form card (add / edit product) ---------- */
 .form-card {
   max-width: 640px;
-  padding: 16px;
+  margin: 0 auto;
+  padding: 24px;
 }
+
+.form-title {
+  margin: 0 0 28px;
+  font-size: clamp(20px, 4vw, 26px);
+  font-weight: 600;
+}
+
+.form-card mat-form-field { width: 100%; }
+.form-card .stack { gap: 8px; }
+
+.field-block { margin: 20px 0 24px; }
+
+.field-label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: var(--muted);
+}
+
+.upload {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.preview {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid #e5e7eb;
+}
+
+.form-actions { margin-top: 8px; }
+
+/* Round color picker */
+input[type="color"] {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 2px solid #e5e7eb;
+  border-radius: 50%;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+}
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: 0; border-radius: 50%; }
+input[type="color"]::-moz-color-swatch { border: 0; border-radius: 50%; }
 
 /* ---------- Dashboard ---------- */
 .dashboard-grid {
@@ -280,8 +321,55 @@ mat-card { border-radius: var(--radius); }
 
 .table-wrap table {
   width: 100%;
-  min-width: 480px;
+  min-width: 680px;          /* scrolls sideways on phones instead of squashing */
   background: transparent;
+}
+
+/* Product thumbnail */
+.thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  display: block;
+  margin: 6px 0;
+}
+
+.thumb.placeholder {
+  display: grid;
+  place-items: center;
+  background: #eef0f6;
+  color: #9ca3af;
+}
+
+/* Round color swatch in the Color column */
+.swatch {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+  vertical-align: middle;
+}
+
+/* Small color dot (used beside a name) */
+.dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-right: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  vertical-align: middle;
+}
+
+/* Keep the action icons on one line */
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 
@@ -324,7 +412,6 @@ mat-card { border-radius: var(--radius); }
 .status[data-status="CANCELLED"] { background: #fee2e2; color: #b91c1c; }
 
 
-
 /* ==========================================================================
    8. RESPONSIVE
    ========================================================================== */
@@ -353,6 +440,9 @@ mat-card { border-radius: var(--radius); }
   .row > mat-form-field { width: 100%; }
 
   .auth-card { margin-top: 4vh; }
+
+  .form-card { padding: 16px; }
+  .form-actions > * { flex: 1; text-align: center; }
 
   .dashboard-grid .mat-mdc-card-title { font-size: 30px; }
 }

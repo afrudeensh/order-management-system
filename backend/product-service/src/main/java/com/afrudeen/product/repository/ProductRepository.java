@@ -13,9 +13,9 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
-    // builds the SQL from the method name:
-    // SELECT * FROM products WHERE LOWER(name) LIKE LOWER('%text%')
-    List<Product> findByNameContainingIgnoreCase(String name);
+    List<Product> findByIsActiveTrue();
+
+    List<Product> findByIsActiveTrueAndNameContainingIgnoreCase(String name);
 
     Optional<Product> findByIdAndIsActive(Long id, Boolean isActive);
 

@@ -1,9 +1,7 @@
 <mat-card class="form-card">
-  <mat-card-title>
-    {{ id ? 'Edit product' : 'New product' }}
-  </mat-card-title>
-
   <mat-card-content>
+    <h2 class="form-title">{{ id ? 'Edit product' : 'New product' }}</h2>
+
     <form [formGroup]="form" (ngSubmit)="save()" class="stack">
       <mat-form-field appearance="outline">
         <mat-label>Name</mat-label>
@@ -17,11 +15,11 @@
         <mat-error>Price must be at least 0.01</mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>Stock</mat-label>
         <input matInput type="number" formControlName="stock" />
         @if (id) {
-          <mat-hint>Use "Add stock" on the Products page to change stock</mat-hint>
+          <mat-hint>Change stock with "Add stock" on the Products page</mat-hint>
         }
         <mat-error>Stock cannot be negative</mat-error>
       </mat-form-field>
@@ -92,7 +90,7 @@
         <p class="error">{{ error() }}</p>
       }
 
-      <div class="row">
+      <div class="row form-actions">
         <button mat-flat-button type="submit" [disabled]="form.invalid">
           Save
         </button>

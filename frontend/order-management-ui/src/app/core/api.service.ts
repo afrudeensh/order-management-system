@@ -10,18 +10,13 @@ import {
   ProductRequest,
 } from './models';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class ProductApi {
   private http = inject(HttpClient);
   private url = `${API_URL}/products`;
 
   getAll(search = '') {
-    const params = search
-      ? new HttpParams().set('search', search)
-      : undefined;
-
+    const params = search ? new HttpParams().set('search', search) : undefined;
     return this.http.get<Product[]>(this.url, { params });
   }
 
@@ -29,15 +24,12 @@ export class ProductApi {
     return this.http.get<Product>(`${this.url}/${id}`);
   }
 
-  create(product: ProductRequest) {
-    return this.http.post<Product>(this.url, product);
+  create(p: ProductRequest) {
+    return this.http.post<Product>(this.url, p);
   }
 
-  update(id: number, product: ProductRequest) {
-    return this.http.put<Product>(
-      `${this.url}/${id}`,
-      product,
-    );
+  update(id: number, p: ProductRequest) {
+    return this.http.put<Product>(`${this.url}/${id}`, p);
   }
 
   delete(id: number) {
@@ -45,17 +37,13 @@ export class ProductApi {
   }
 
   addStock(id: number, quantity: number) {
-  return this.http.put<Product>(
-    `${API_URL}/products/${id}/stock/increase`,
-    null,
-    { params: { quantity } },
-  );
-}
+    return this.http.put<Product>(`${this.url}/${id}/stock/increase`, null, {
+      params: { quantity },
+    });
+  }
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class OrderApi {
   private http = inject(HttpClient);
   private url = `${API_URL}/orders`;
@@ -69,7 +57,7 @@ export class OrderApi {
   }
 
   all() {
-    return this.http.get<Order[]>(this.url);   // admin only
+    return this.http.get<Order[]>(this.url);          // admin only
   }
 
   updateStatus(id: number, status: string) {
@@ -81,16 +69,11 @@ export class OrderApi {
   }
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class NotificationApi {
   private http = inject(HttpClient);
 
   mine() {
-    return this.http.get<AppNotification[]>(
-      `${API_URL}/notifications/my`,
-    );
+    return this.http.get<AppNotification[]>(`${API_URL}/notifications/my`);
   }
 }
-

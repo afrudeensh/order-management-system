@@ -8,14 +8,13 @@ import {
 import { RouterLink } from '@angular/router';
 
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { AddStockDialogComponent } from '../../shared/add-stock-dialog.component';
 
 import {
   catchError,
@@ -29,10 +28,11 @@ import {
 
 import { AuthService } from '../../core/auth.service';
 import { ProductApi } from '../../core/api.service';
+import { LOW_STOCK_LIMIT } from '../../core/config';
 import { errorMessage } from '../../core/http-error';
 import { Product } from '../../core/models';
+import { AddStockDialogComponent } from '../../shared/add-stock-dialog.component';
 import { ConfirmService } from '../../shared/confirm-dialog.component';
-import { LOW_STOCK_LIMIT } from '../../core/config';
 
 @Component({
   selector: 'app-product-list',
@@ -46,7 +46,6 @@ import { LOW_STOCK_LIMIT } from '../../core/config';
     MatFormFieldModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    MatDialogModule,
   ],
   templateUrl: './product-list.component.html',
 })
@@ -55,6 +54,7 @@ export class ProductListComponent {
 
   private api = inject(ProductApi);
   private snack = inject(MatSnackBar);
+  private dialog = inject(MatDialog);
   private confirmDialog = inject(ConfirmService);
 
   lowLimit = LOW_STOCK_LIMIT;
@@ -68,9 +68,8 @@ export class ProductListComponent {
   error = signal('');
 
   cols = this.auth.isAdmin()
-  ? ['image', 'name', 'price', 'stock', 'actions']
-  : ['image', 'name', 'price', 'stock'];
-  dialog: any;
+    ? ['image', 'name', 'color', 'price', 'stock', 'actions']
+    : ['image', 'name', 'color', 'price', 'stock'];
 
   constructor() {
     this.search.valueChanges
@@ -108,55 +107,55 @@ export class ProductListComponent {
   }
 
   remove(product: Product): void {
-  this.confirmDialog
-    .ask({
-      title: 'Delete product?',
-      message: `"${product.name}" will be removed from the catalogue.`,
-      confirmText: 'Delete',
-      danger: true,
-    })
-    .subscribe((ok) => {
-      if (!ok) return;
+    this.confirmDialog
+      .ask({
+        title: 'Delete product?',
+        message: `"${product.name}" will be removed from the catalogue.`,
+        confirmText: 'Delete',
+        danger: true,
+      })
+      .subscribe((ok) => {
+        if (!ok) return;
 
-      this.api.delete(product.id).subscribe({
-        next: () => {
-          this.products.update((list) =>
-            list.filter((item) => item.id !== product.id),
-          );
-          this.snack.open('Product deleted', 'OK', { duration: 2500 });
-        },
-        error: (err) => {
-          this.snack.open(errorMessage(err), 'OK', { duration: 4000 });
-        },
+        this.api.delete(product.id).subscribe({
+          next: () => {
+            this.products.update((list) =>
+              list.filter((item) => item.id !== product.id),
+            );
+            this.snack.open('Product deleted', 'OK', { duration: 2500 });
+          },
+          error: (err) => {
+            this.snack.open(errorMessage(err), 'OK', { duration: 4000 });
+          },
+        });
       });
-    });
-}
+  }
 
-addStock(product: Product): void {
-  this.dialog
-    .open(AddStockDialogComponent, {
-      data: { name: product.name, current: product.stock },
-      width: '380px',
-      maxWidth: '92vw',
-    })
-    .afterClosed()
-    .subscribe((qty: number) => {
-      if (!qty) return;
+  addStock(product: Product): void {
+    this.dialog
+      .open(AddStockDialogComponent, {
+        data: { name: product.name, current: product.stock },
+        width: '380px',
+        maxWidth: '92vw',
+      })
+      .afterClosed()
+      .subscribe((qty: number | null) => {
+        if (!qty) return;
 
-      this.api.addStock(product.id, qty).subscribe({
-        next: (updated) => {
-          this.products.update((list) =>
-            list.map((p) => (p.id === updated.id ? updated : p)),
-          );
-          this.snack.open(
-            `Added ${qty} to ${updated.name}. Stock is now ${updated.stock}`,
-            'OK',
-            { duration: 3000 },
-          );
-        },
-        error: (err) =>
-          this.snack.open(errorMessage(err), 'OK', { duration: 4000 }),
+        this.api.addStock(product.id, qty).subscribe({
+          next: (updated) => {
+            this.products.update((list) =>
+              list.map((p) => (p.id === updated.id ? updated : p)),
+            );
+            this.snack.open(
+              `Added ${qty} to ${updated.name}. Stock is now ${updated.stock}`,
+              'OK',
+              { duration: 3000 },
+            );
+          },
+          error: (err) =>
+            this.snack.open(errorMessage(err), 'OK', { duration: 4000 }),
+        });
       });
-    });
-}
+  }
 }
