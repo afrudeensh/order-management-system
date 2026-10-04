@@ -15,6 +15,8 @@ import com.afrudeen.order.event.OrderCreatedEvent;
 import com.afrudeen.order.event.OrderEventPublisher;
 import com.afrudeen.order.repository.OrderRepository;
 import com.afrudeen.order.service.OrderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,11 +27,12 @@ import java.util.List;
 @Service
 public class OrderServiceImpl implements OrderService {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
+    private static final int LOW_STOCK_LIMIT = 15;
+
     private final OrderRepository repository;
     private final ProductGateway products;
     private final OrderEventPublisher events;
-    private static final int LOW_STOCK_LIMIT = 15;
-
 
     public OrderServiceImpl(OrderRepository repository, ProductGateway products, OrderEventPublisher events) {
         this.repository = repository;
@@ -41,12 +44,12 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse create(Long userId, CreateOrderRequest request) {
         Order order = new Order(userId);
         BigDecimal total = BigDecimal.ZERO;
-
         List<String> lowStock = new ArrayList<>();
 
+        // 1. Validate every line and compute the total on the SERVER
         for (OrderItemRequest line : request.items()) {
             ProductResponse p = products.getProduct(line.productId()); // sync call
-            System.out.println("PRODUCT RESPONSE = " + p);
+            log.debug("Product response = {}", p);
 
             if (p.stock() < line.quantity()) {
                 throw new BusinessException("Insufficient stock for " + p.name());
@@ -61,42 +64,59 @@ public class OrderServiceImpl implements OrderService {
             total = total.add(p.price().multiply(BigDecimal.valueOf(line.quantity())));
         }
 
-        order.setTotalAmount(total); // total computed on the SERVER
+        order.setTotalAmount(total);
         Order saved = repository.save(order);
 
-        for (OrderItemRequest line : request.items()) {
-            products.decreaseStock(line.productId(), line.quantity());
+        // 2. Reserve stock; if anything fails, undo what already succeeded and remove the order
+        List<OrderItemRequest> reserved = new ArrayList<>();
+        try {
+            for (OrderItemRequest line : request.items()) {
+                products.decreaseStock(line.productId(), line.quantity());
+                reserved.add(line);
+            }
+        } catch (RuntimeException e) {
+            log.error("Stock update failed for order {}, rolling back", saved.getId(), e);
+            for (OrderItemRequest line : reserved) {
+                try {
+                    products.increaseStock(line.productId(), line.quantity());
+                } catch (RuntimeException ex) {
+                    log.error("Could not restore stock for product {} (qty {})",
+                            line.productId(), line.quantity(), ex);
+                }
+            }
+            repository.delete(saved);
+            throw e;
         }
 
-        events.publish(new OrderCreatedEvent(saved.getId(), saved.getUserId(),
-                saved.getTotalAmount(), saved.getCreatedAt(), lowStock));
-        return OrderResponse.from(saved);
+        // 3. Publish the event; a notification failure must never fail the order
+        try {
+            events.publish(new OrderCreatedEvent(saved.getId(), saved.getUserId(),
+                    saved.getTotalAmount(), saved.getCreatedAt(), lowStock));
+        } catch (RuntimeException e) {
+            log.error("Event publish failed for order {}", saved.getId(), e);
+        }
 
+        return OrderResponse.from(saved);
     }
 
     @Override
     @Transactional(readOnly = true)
     public OrderResponse findById(Long id, Long userId, boolean admin) {
-
         Order o = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + id));
 
         if (!admin && !o.getUserId().equals(userId)) {
             throw new ForbiddenException("This order belongs to another user");
         }
-
         return OrderResponse.from(o);
     }
-
 
     @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> findMine(Long userId) {
-
         return repository.findByUserWithItems(userId)
                 .stream().map(OrderResponse::from).toList();
     }
-
 
     @Override
     @Transactional(readOnly = true)

@@ -1,6 +1,5 @@
 package com.afrudeen.user.controller;
 
-import com.afrudeen.user.dto.*;
 import com.afrudeen.user.dto.request.ChangePasswordRequest;
 import com.afrudeen.user.dto.request.UpdateProfileRequest;
 import com.afrudeen.user.dto.response.AuthResponse;

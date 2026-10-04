@@ -16,8 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductGateway {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(ProductGateway.class);
+    private static final Logger log = LoggerFactory.getLogger(ProductGateway.class);
 
     private final ProductClient client;
 
@@ -25,71 +24,56 @@ public class ProductGateway {
         this.client = client;
     }
 
-    @CircuitBreaker(
-            name = "productService",
-            fallbackMethod = "fallback"
-    )
+    @CircuitBreaker(name = "productService", fallbackMethod = "fallback")
     public ProductResponse getProduct(Long id) {
-
         try {
-            BaseResponse<ProductResponse> response =
-                    client.findById(id);
-
+            BaseResponse<ProductResponse> response = client.findById(id);
             return response.data();
-
         } catch (FeignException.NotFound e) {
-
-            throw new ResourceNotFoundException(
-                    "Product not found: " + id
-            );
+            throw new ResourceNotFoundException("Product not found: " + id);
         }
     }
 
     private ProductResponse fallback(Long id, Throwable ex) {
-
         if (ex instanceof ResourceNotFoundException notFound) {
             throw notFound;
         }
 
-        log.warn(
-                "Product service unavailable for product {}: {}",
-                id,
-                ex.toString()
-        );
+        log.warn("Product service unavailable for product {}: {}", id, ex.toString());
 
         throw new ServiceUnavailableException(
-                "Product service is unavailable right now. " +
-                        "Please try again shortly."
-        );
+                "Product service is unavailable right now. Please try again shortly.");
     }
 
     public void decreaseStock(Long id, int quantity) {
-
         try {
-
             client.decreaseStock(id, quantity);
 
         } catch (FeignException.NotFound e) {
-
             throw new ResourceNotFoundException("Product not found: " + id);
 
         } catch (FeignException e) {
+            log.warn("decreaseStock failed for product {} (status {}): {}",
+                    id, e.status(), e.getMessage());
 
-            throw new BusinessException("Insufficient stock for product " + id);
-
+            // 4xx = the product-service rejected it (e.g. insufficient stock)
+            if (e.status() >= 400 && e.status() < 500) {
+                throw new BusinessException("Insufficient stock for product " + id);
+            }
+            // timeout / connection refused (status -1) / 5xx = service problem
+            throw new ServiceUnavailableException(
+                    "Product service is unavailable right now. Please try again shortly.");
         }
     }
 
     public void increaseStock(Long id, int quantity) {
-
         try {
-
             client.increaseStock(id, quantity);
 
         } catch (FeignException e) {
-
+            log.warn("increaseStock failed for product {} (status {}): {}",
+                    id, e.status(), e.getMessage());
             throw new BusinessException("Could not return stock for product " + id);
-
         }
     }
 }
