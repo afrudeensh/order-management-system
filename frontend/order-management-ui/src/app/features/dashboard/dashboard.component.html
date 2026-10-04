@@ -1,68 +1,97 @@
-<h2>
-  Welcome, {{ auth.user()?.name | titlecase }}
-</h2>
+<h2>Welcome, {{ auth.user()?.name | titlecase }}</h2>
 
-<div class="dashboard-grid">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>
-        {{ counts().products }}
-      </mat-card-title>
+@if (auth.isAdmin()) {
+  <div class="dashboard-grid">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ stats().products }}</mat-card-title>
+        <mat-card-subtitle>Products</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-actions>
+        <a mat-button routerLink="/products">Manage products</a>
+      </mat-card-actions>
+    </mat-card>
 
-      <mat-card-subtitle>
-        Products
-      </mat-card-subtitle>
-    </mat-card-header>
+    <mat-card class="warn">
+      <mat-card-header>
+        <mat-card-title>{{ lowStock().length }}</mat-card-title>
+        <mat-card-subtitle>Low stock (under {{ lowStockLimit }})</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-actions>
+        <a mat-button routerLink="/products">Restock</a>
+      </mat-card-actions>
+    </mat-card>
 
-    <mat-card-actions>
-      <a
-        mat-button
-        routerLink="/products"
-      >
-        View products
-      </a>
-    </mat-card-actions>
-  </mat-card>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ stats().orders }}</mat-card-title>
+        <mat-card-subtitle>Total orders</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-actions>
+        <a mat-button routerLink="/orders">View orders</a>
+      </mat-card-actions>
+    </mat-card>
 
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>
-        {{ counts().orders }}
-      </mat-card-title>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ stats().pending }}</mat-card-title>
+        <mat-card-subtitle>Pending orders</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-actions>
+        <a mat-button routerLink="/orders">Process orders</a>
+      </mat-card-actions>
+    </mat-card>
 
-      <mat-card-subtitle>
-        My orders
-      </mat-card-subtitle>
-    </mat-card-header>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ stats().revenue | currency: 'INR' : 'symbol' : '1.0-0' }}</mat-card-title>
+        <mat-card-subtitle>Revenue</mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
+  </div>
 
-    <mat-card-actions>
-      <a
-        mat-button
-        routerLink="/orders"
-      >
-        View orders
-      </a>
-    </mat-card-actions>
-  </mat-card>
+  @if (lowStock().length > 0) {
+    <mat-card class="low-stock">
+      <h3>Needs restocking</h3>
 
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>
-        {{ counts().notifications }}
-      </mat-card-title>
+      @for (p of lowStock(); track p.id) {
+        <div class="low-row">
+          <span>{{ p.name }}</span>
+          <span class="stock-chip">{{ p.stock }} left</span>
+        </div>
+      }
+    </mat-card>
+  }
+} @else {
+  <div class="dashboard-grid">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ counts().products }}</mat-card-title>
+        <mat-card-subtitle>Products</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-actions>
+        <a mat-button routerLink="/products">View products</a>
+      </mat-card-actions>
+    </mat-card>
 
-      <mat-card-subtitle>
-        Notifications
-      </mat-card-subtitle>
-    </mat-card-header>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ counts().orders }}</mat-card-title>
+        <mat-card-subtitle>My orders</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-actions>
+        <a mat-button routerLink="/orders">View orders</a>
+      </mat-card-actions>
+    </mat-card>
 
-    <mat-card-actions>
-      <a
-        mat-button
-        routerLink="/notifications"
-      >
-        View notifications
-      </a>
-    </mat-card-actions>
-  </mat-card>
-</div>
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>{{ counts().notifications }}</mat-card-title>
+        <mat-card-subtitle>Notifications</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-actions>
+        <a mat-button routerLink="/notifications">View notifications</a>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+}

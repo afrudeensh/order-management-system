@@ -98,6 +98,27 @@ mat-card { border-radius: var(--radius); }
 .dashboard-grid mat-card { padding: 12px; }
 .dashboard-grid .mat-mdc-card-title { font-size: 36px; font-weight: 700; color: var(--primary); }
 
+.dashboard-grid .warn .mat-mdc-card-title { color: var(--danger); }
+
+.low-stock { margin-top: var(--space); padding: 16px; }
+.low-stock h3 { margin: 0 0 8px; }
+.low-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+.low-row:last-child { border-bottom: 0; }
+.stock-chip {
+  background: #fee2e2;
+  color: #b91c1c;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .order-line { margin-bottom: 12px; padding: 8px; }
 .order-line mat-form-field { flex: 1 1 180px; min-width: 0; }
 .order-card { margin-bottom: 14px; padding: 8px; }
