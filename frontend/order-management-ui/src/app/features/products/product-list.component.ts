@@ -29,6 +29,7 @@ import { AuthService } from '../../core/auth.service';
 import { ProductApi } from '../../core/api.service';
 import { errorMessage } from '../../core/http-error';
 import { Product } from '../../core/models';
+import { ConfirmService } from '../../shared/confirm-dialog.component';
 
 @Component({
   selector: 'app-product-list',
@@ -50,6 +51,7 @@ export class ProductListComponent {
 
   private api = inject(ProductApi);
   private snack = inject(MatSnackBar);
+  private confirmDialog = inject(ConfirmService);
 
   search = new FormControl('', {
     nonNullable: true,
@@ -97,30 +99,27 @@ export class ProductListComponent {
   }
 
   remove(product: Product): void {
-    if (!confirm(`Delete ${product.name}?`)) {
-      return;
-    }
+  this.confirmDialog
+    .ask({
+      title: 'Delete product?',
+      message: `"${product.name}" will be removed from the catalogue.`,
+      confirmText: 'Delete',
+      danger: true,
+    })
+    .subscribe((ok) => {
+      if (!ok) return;
 
-    this.api.delete(product.id).subscribe({
-      next: () => {
-        this.products.update((list) =>
-          list.filter((item) => item.id !== product.id),
-        );
-
-        this.snack.open('Product deleted', 'OK', {
-          duration: 2500,
-        });
-      },
-
-      error: (err) => {
-        this.snack.open(
-          errorMessage(err),
-          'OK',
-          {
-            duration: 4000,
-          },
-        );
-      },
+      this.api.delete(product.id).subscribe({
+        next: () => {
+          this.products.update((list) =>
+            list.filter((item) => item.id !== product.id),
+          );
+          this.snack.open('Product deleted', 'OK', { duration: 2500 });
+        },
+        error: (err) => {
+          this.snack.open(errorMessage(err), 'OK', { duration: 4000 });
+        },
+      });
     });
-  }
+}
 }

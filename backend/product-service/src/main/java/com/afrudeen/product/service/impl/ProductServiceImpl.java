@@ -80,4 +80,10 @@ public class ProductServiceImpl implements ProductService {
             throw new BusinessException("Insufficient stock for product " + id);
         }
     }
+
+    @Transactional
+    public void increaseStock(Long id, int qty) {
+        findById(id);                       // 404 if the product is gone
+        productRepository.increaseStock(id, qty);
+    }
 }

@@ -79,4 +79,17 @@ public class ProductGateway {
 
         }
     }
+
+    public void increaseStock(Long id, int quantity) {
+
+        try {
+
+            client.increaseStock(id, quantity);
+
+        } catch (FeignException e) {
+
+            throw new BusinessException("Could not return stock for product " + id);
+
+        }
+    }
 }

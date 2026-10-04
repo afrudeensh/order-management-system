@@ -10,6 +10,7 @@ import com.afrudeen.order.dto.response.OrderResponse;
 import com.afrudeen.order.dto.response.ProductResponse;
 import com.afrudeen.order.entity.Order;
 import com.afrudeen.order.entity.OrderItem;
+import com.afrudeen.order.enums.OrderStatus;
 import com.afrudeen.order.event.OrderCreatedEvent;
 import com.afrudeen.order.event.OrderEventPublisher;
 import com.afrudeen.order.repository.OrderRepository;
@@ -93,5 +94,39 @@ public class OrderServiceImpl implements OrderService {
     public List<OrderResponse> findAll() {
         return repository.findAll()
                 .stream().map(OrderResponse::from).toList();
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse updateStatus(Long id, OrderStatus status) {
+        if (status == OrderStatus.CANCELLED) {
+            throw new BusinessException("Use the cancel action to cancel an order");
+        }
+        Order o = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + id));
+
+        o.changeStatus(status);
+        return OrderResponse.from(o);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse cancel(Long id, Long userId, boolean admin) {
+        Order o = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + id));
+
+        if (!admin && !o.getUserId().equals(userId)) {
+            throw new ForbiddenException("This order belongs to another user");
+        }
+        if (!admin && o.getStatus() != OrderStatus.CREATED) {
+            throw new BusinessException("Only orders that are not confirmed yet can be cancelled");
+        }
+
+        o.changeStatus(OrderStatus.CANCELLED);       // also checks the move is allowed
+
+        for (OrderItem item : o.getItems()) {
+            products.increaseStock(item.getProductId(), item.getQuantity());
+        }
+        return OrderResponse.from(o);
     }
 }

@@ -1,6 +1,7 @@
 package com.afrudeen.order.entity;
 
 import com.afrudeen.order.common.BaseEntity;
+import com.afrudeen.order.common.BusinessException;
 import com.afrudeen.order.enums.OrderStatus;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -34,6 +35,14 @@ public class Order extends BaseEntity {
     public void addItem(OrderItem item) { // keeps both sides of the relation in sync
         items.add(item);
         item.setOrder(this);
+    }
+
+    public void changeStatus(OrderStatus next) {
+        if (!status.canMoveTo(next)) {
+            throw new BusinessException(
+                    "Cannot change order from " + status + " to " + next);
+        }
+        this.status = next;
     }
 
     @Override

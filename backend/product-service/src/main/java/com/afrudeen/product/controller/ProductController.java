@@ -60,4 +60,9 @@ public class ProductController {
     public void decreaseStock(@PathVariable Long id, @RequestParam int quantity) {
         service.decreaseStock(id, quantity);
     }
+
+    @PutMapping("/{id}/stock/increase")
+    public void increaseStock(@PathVariable Long id, @RequestParam int quantity) {
+        service.increaseStock(id, quantity);
+    }
 }

@@ -63,6 +63,14 @@ export class OrderApi {
   all() {
     return this.http.get<Order[]>(this.url);   // admin only
   }
+
+  updateStatus(id: number, status: string) {
+    return this.http.put<Order>(`${this.url}/${id}/status`, { status });
+  }
+
+  cancel(id: number) {
+    return this.http.put<Order>(`${this.url}/${id}/cancel`, {});
+  }
 }
 
 @Injectable({

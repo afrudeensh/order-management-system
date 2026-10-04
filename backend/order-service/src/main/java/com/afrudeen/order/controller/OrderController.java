@@ -1,6 +1,7 @@
 package com.afrudeen.order.controller;
 
 import com.afrudeen.order.dto.request.CreateOrderRequest;
+import com.afrudeen.order.dto.request.UpdateStatusRequest;
 import com.afrudeen.order.dto.response.OrderResponse;
 import com.afrudeen.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,5 +53,24 @@ public class OrderController {
             throw new ForbiddenException("Admin only");
         }
         return service.findAll();
+    }
+
+    @PutMapping("/{id}/status")
+    @Operation(summary = "Change order status (admin only)")
+    public OrderResponse updateStatus(@PathVariable Long id,
+                                      @RequestHeader("X-User-Role") String role,
+                                      @Valid @RequestBody UpdateStatusRequest request) {
+        if (!"ADMIN".equals(role)) {
+            throw new ForbiddenException("Admin only");
+        }
+        return service.updateStatus(id, request.status());
+    }
+
+    @PutMapping("/{id}/cancel")
+    @Operation(summary = "Cancel an order (owner or admin)")
+    public OrderResponse cancel(@PathVariable Long id,
+                                @RequestHeader("X-User-Id") Long userId,
+                                @RequestHeader("X-User-Role") String role) {
+        return service.cancel(id, userId, "ADMIN".equals(role));
     }
 }

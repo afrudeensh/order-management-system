@@ -1,4 +1,5 @@
 import { Component, inject, signal, viewChild } from '@angular/core';
+import { ConfirmService } from '../../shared/confirm-dialog.component';
 import {
   CurrencyPipe,
   DatePipe,
@@ -53,6 +54,7 @@ export class OrdersComponent {
   private orderApi = inject(OrderApi);
   private snack = inject(MatSnackBar);
   private notificationStore = inject(NotificationStore);
+  private confirmDialog = inject(ConfirmService);
   auth = inject(AuthService);
 
   // The <form [formGroup]> in the template, used to clear the "submitted" state
@@ -69,6 +71,67 @@ export class OrdersComponent {
       this.newLine(),
     ]),
   });
+
+  private steps: Record<string, { status: string; label: string }> = {
+  CREATED:   { status: 'CONFIRMED', label: 'Confirm' },
+  CONFIRMED: { status: 'SHIPPED',   label: 'Mark shipped' },
+  SHIPPED:   { status: 'DELIVERED', label: 'Mark delivered' },
+};
+
+nextStep(order: Order) {
+  return this.steps[order.status];
+}
+
+canCancel(order: Order): boolean {
+  return this.auth.isAdmin()
+    ? ['CREATED', 'CONFIRMED'].includes(order.status)
+    : order.status === 'CREATED';
+}
+
+advance(order: Order): void {
+  const step = this.nextStep(order);
+  if (!step) return;
+
+  this.orderApi.updateStatus(order.id, step.status).subscribe({
+    next: (updated) => {
+      this.replace(updated);
+      this.snack.open(`Order #${order.id} is now ${updated.status}`, 'OK', { duration: 2500 });
+    },
+    error: (err) => this.snack.open(errorMessage(err), 'OK', { duration: 4000 }),
+  });
+}
+
+cancel(order: Order): void {
+  this.confirmDialog
+    .ask({
+      title: `Cancel order #${order.id}?`,
+      message: 'The items will go back into stock. This cannot be undone.',
+      confirmText: 'Yes, cancel order',
+      cancelText: 'Keep order',
+      danger: true,
+    })
+    .subscribe((ok) => {
+      if (!ok) return;
+
+      this.orderApi.cancel(order.id).subscribe({
+        next: (updated) => {
+          this.replace(updated);
+          if (!this.auth.isAdmin()) {
+            this.loadProducts();
+          }
+          this.snack.open(`Order #${order.id} cancelled`, 'OK', { duration: 2500 });
+        },
+        error: (err) =>
+          this.snack.open(errorMessage(err), 'OK', { duration: 4000 }),
+      });
+    });
+}
+
+private replace(updated: Order): void {
+  this.orders.update((list) =>
+    list.map((o) => (o.id === updated.id ? updated : o)),
+  );
+}
 
   get lines(): ReturnType<typeof this.newLine>[] {
     return this.form.controls.lines.controls;

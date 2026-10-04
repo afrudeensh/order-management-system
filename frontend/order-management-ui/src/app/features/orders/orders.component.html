@@ -92,12 +92,11 @@
       <mat-card-title>Order #{{ order.id }}</mat-card-title>
 
       <mat-card-subtitle>
+        <span class="status" [attr.data-status]="order.status">{{ order.status }}</span>
         @if (auth.isAdmin()) {
-          Customer #{{ order.userId }} ·
+          · Customer #{{ order.userId }}
         }
-        {{ order.status }}
-        ·
-        {{ order.createdAt | date: 'medium' }}
+        · {{ order.createdAt | date: 'medium' }}
       </mat-card-subtitle>
     </mat-card-header>
 
@@ -114,6 +113,17 @@
         <strong>{{ order.totalAmount | currency: 'INR' }}</strong>
       </div>
     </mat-card-content>
+
+    @if ((auth.isAdmin() && nextStep(order)) || canCancel(order)) {
+      <mat-card-actions>
+        @if (auth.isAdmin() && nextStep(order); as step) {
+          <button mat-flat-button (click)="advance(order)">{{ step.label }}</button>
+        }
+        @if (canCancel(order)) {
+          <button mat-button color="warn" (click)="cancel(order)">Cancel order</button>
+        }
+      </mat-card-actions>
+    }
   </mat-card>
 } @empty {
   <p>
