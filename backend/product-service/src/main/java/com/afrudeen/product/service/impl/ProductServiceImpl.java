@@ -35,7 +35,9 @@ public class ProductServiceImpl implements ProductService {
         Product saved = productRepository
                 .save(new Product(productRequest.name(),
                         productRequest.price(),
-                        productRequest.stock()));
+                        productRequest.stock(),
+                        productRequest.image(),
+                        productRequest.color()));
 
         log.info("Created product {}", saved.getDisplayName());
         return saved;
@@ -69,6 +71,8 @@ public class ProductServiceImpl implements ProductService {
         Product product = findById(id);
         product.setName(productRequest.name());
         product.setPrice(productRequest.price());
+        product.setImage(productRequest.image());
+        product.setColor(productRequest.color());
         return productRepository.save(product);
     }
 

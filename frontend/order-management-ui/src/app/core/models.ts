@@ -10,6 +10,8 @@ export interface Product{
     name:string;
     price:number;
     stock:number;
+    image?: string | null;
+    color?: string | null;
 }
 
 export interface ProductRequest{

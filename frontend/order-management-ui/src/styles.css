@@ -1,19 +1,46 @@
+/* ==========================================================================
+   GLOBAL STYLES
+   --------------------------------------------------------------------------
+   1. Design tokens
+   2. Base / reset
+   3. Navbar
+   4. Layout helpers
+   5. Cards (auth, form, dashboard, orders)
+   6. Tables & products
+   7. Status / chips / text utilities
+   8. Responsive (tablet, phone)
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. DESIGN TOKENS
+   ========================================================================== */
 :root {
   --space: 16px;
   --radius: 14px;
+
   --muted: #6b7280;
   --danger: #dc2626;
   --primary: #4f46e5;
   --surface: #ffffff;
   --bg: #f3f4f8;
 
+  /* Angular Material overrides */
   --mat-button-filled-container-color: var(--primary);
   --mat-button-filled-label-text-color: #fff;
 }
 
+
+/* ==========================================================================
+   2. BASE / RESET
+   ========================================================================== */
 * { box-sizing: border-box; }
 
-html, body { max-width: 100%; overflow-x: hidden; }
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
 
 body {
   margin: 0;
@@ -23,9 +50,17 @@ body {
 }
 
 a { text-decoration: none; }
-h2 { margin: 8px 0 20px; font-weight: 600; font-size: clamp(20px, 4vw, 26px); }
 
-/* ---------- Navbar ---------- */
+h2 {
+  margin: 8px 0 20px;
+  font-weight: 600;
+  font-size: clamp(20px, 4vw, 26px);
+}
+
+
+/* ==========================================================================
+   3. NAVBAR
+   ========================================================================== */
 .nav {
   --mat-toolbar-container-background-color: var(--primary);
   --mat-toolbar-container-text-color: #fff;
@@ -34,12 +69,14 @@ h2 { margin: 8px 0 20px; font-weight: 600; font-size: clamp(20px, 4vw, 26px); }
   --mat-button-outlined-outline-color: rgba(255, 255, 255, 0.6);
   --mat-badge-background-color: #ef4444;
   --mat-badge-text-color: #fff;
+
   gap: 6px;
   position: sticky;
   top: 0;
   z-index: 10;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
+
 .nav .brand {
   font-weight: 600;
   margin: 0 12px 0 8px;
@@ -47,13 +84,26 @@ h2 { margin: 8px 0 20px; font-weight: 600; font-size: clamp(20px, 4vw, 26px); }
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .nav a.active { background: rgba(255, 255, 255, 0.2); }
-.nav .mat-badge-content { background: #ef4444; color: #fff; font-weight: 600; }
-.spacer { flex: 1 1 auto; }
+
+.nav .mat-badge-content {
+  background: #ef4444;
+  color: #fff;
+  font-weight: 600;
+}
 
 .nav .menu-btn { display: none; }
-.nav .desktop-links { display: flex; align-items: center; gap: 6px; }
 
+.nav .desktop-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.spacer { flex: 1 1 auto; }
+
+/* User info in navbar */
 .who {
   display: flex;
   align-items: center;
@@ -61,6 +111,7 @@ h2 { margin: 8px 0 20px; font-weight: 600; font-size: clamp(20px, 4vw, 26px); }
   margin-right: 8px;
   font-size: 14px;
 }
+
 .avatar {
   width: 30px;
   height: 30px;
@@ -70,6 +121,7 @@ h2 { margin: 8px 0 20px; font-weight: 600; font-size: clamp(20px, 4vw, 26px); }
   place-items: center;
   font-weight: 600;
 }
+
 .role-chip {
   background: #fff;
   color: var(--primary);
@@ -79,29 +131,97 @@ h2 { margin: 8px 0 20px; font-weight: 600; font-size: clamp(20px, 4vw, 26px); }
   border-radius: 999px;
 }
 
-/* ---------- Layout ---------- */
-.page { max-width: 1000px; margin: 0 auto; padding: 24px var(--space); }
-.row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+/* ==========================================================================
+   4. LAYOUT HELPERS
+   ========================================================================== */
+.page {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px var(--space);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .between { justify-content: space-between; }
-.stack { display: flex; flex-direction: column; gap: 4px; }
 
-/* ---------- Cards ---------- */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+
+/* ==========================================================================
+   5. CARDS
+   ========================================================================== */
 mat-card { border-radius: var(--radius); }
-.auth-card { width: calc(100% - 32px); max-width: 420px; margin: 8vh auto 0; padding: 16px; }
-.form-card { max-width: 640px; padding: 16px; }
 
+/* ---------- Auth card (Sign in / Register) ---------- */
+.auth-card {
+  width: calc(100% - 32px);
+  max-width: 420px;
+  margin: 8vh auto 0;
+  padding: 16px;
+}
+
+/* FIX: gap between "Sign in" title and the Email field.
+   Header must size to its content, and the content needs top space
+   because outline labels float above the field's top border. */
+.auth-card .mat-mdc-card-header {
+  height: auto;
+  min-height: 0;
+  padding-bottom: 8px;
+}
+
+.auth-card .mat-mdc-card-content {
+  padding-top: 16px;
+}
+
+.auth-card .mat-mdc-card-title {
+  margin: 0;
+}
+
+.auth-card mat-card-actions {
+  padding: 0 16px 16px;
+}
+
+/* ---------- Form card ---------- */
+.form-card {
+  max-width: 640px;
+  padding: 16px;
+}
+
+/* ---------- Dashboard ---------- */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--space);
 }
+
 .dashboard-grid mat-card { padding: 12px; }
-.dashboard-grid .mat-mdc-card-title { font-size: 36px; font-weight: 700; color: var(--primary); }
+
+.dashboard-grid .mat-mdc-card-title {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--primary);
+}
 
 .dashboard-grid .warn .mat-mdc-card-title { color: var(--danger); }
 
-.low-stock { margin-top: var(--space); padding: 16px; }
+/* ---------- Low stock list ---------- */
+.low-stock {
+  margin-top: var(--space);
+  padding: 16px;
+}
+
 .low-stock h3 { margin: 0 0 8px; }
+
 .low-row {
   display: flex;
   justify-content: space-between;
@@ -109,7 +229,69 @@ mat-card { border-radius: var(--radius); }
   padding: 8px 0;
   border-bottom: 1px solid #eee;
 }
+
 .low-row:last-child { border-bottom: 0; }
+
+/* ---------- Orders ---------- */
+.order-line {
+  margin-bottom: 12px;
+  padding: 8px;
+}
+
+.order-line mat-form-field {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
+.order-card {
+  margin-bottom: 14px;
+  padding: 8px;
+}
+
+.order-item,
+.order-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+}
+
+.order-total {
+  border-top: 1px dashed #d1d5db;
+  margin-top: 8px;
+  padding-top: 10px;
+}
+
+
+/* ==========================================================================
+   6. TABLES & PRODUCTS
+   ========================================================================== */
+.search {
+  width: 320px;
+  max-width: 100%;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.table-wrap table {
+  width: 100%;
+  min-width: 480px;
+  background: transparent;
+}
+
+
+/* ==========================================================================
+   7. STATUS / CHIPS / TEXT UTILITIES
+   ========================================================================== */
+.error { color: var(--danger); }
+.muted { color: var(--muted); }
+
+/* Stock chips */
 .stock-chip {
   background: #fee2e2;
   color: #b91c1c;
@@ -119,31 +301,12 @@ mat-card { border-radius: var(--radius); }
   font-weight: 600;
 }
 
-.order-line { margin-bottom: 12px; padding: 8px; }
-.order-line mat-form-field { flex: 1 1 180px; min-width: 0; }
-.order-card { margin-bottom: 14px; padding: 8px; }
-.order-item, .order-total {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 6px 0;
+.stock-chip.out {
+  background: #b91c1c;
+  color: #fff;
 }
-.order-total { border-top: 1px dashed #d1d5db; margin-top: 8px; padding-top: 10px; }
 
-/* ---------- Products ---------- */
-.search { width: 320px; max-width: 100%; }
-
-.table-wrap {
-  overflow-x: auto;
-  background: var(--surface);
-  border-radius: var(--radius);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-.table-wrap table { width: 100%; min-width: 480px; background: transparent; }
-
-.error { color: var(--danger); }
-.muted { color: var(--muted); }
-
+/* Order status chips */
 .status {
   display: inline-block;
   padding: 1px 10px;
@@ -153,6 +316,7 @@ mat-card { border-radius: var(--radius); }
   background: #e5e7eb;
   color: #374151;
 }
+
 .status[data-status="CREATED"]   { background: #fef3c7; color: #92400e; }
 .status[data-status="CONFIRMED"] { background: #dbeafe; color: #1e40af; }
 .status[data-status="SHIPPED"]   { background: #ede9fe; color: #5b21b6; }
@@ -160,23 +324,35 @@ mat-card { border-radius: var(--radius); }
 .status[data-status="CANCELLED"] { background: #fee2e2; color: #b91c1c; }
 
 
-.stock-chip.out { background: #b91c1c; color: #fff; }
 
-/* ---------- Tablet and phone ---------- */
+/* ==========================================================================
+   8. RESPONSIVE
+   ========================================================================== */
+
+/* ---------- Tablet ---------- */
 @media (max-width: 820px) {
-   .nav .desktop-links,
+  .nav .desktop-links,
   .nav .logout-desktop { display: none; }
+
   .nav .menu-btn { display: inline-flex; }
+
   .page { padding: 16px 12px; }
 }
 
+/* ---------- Phone ---------- */
 @media (max-width: 560px) {
   .who .name,
   .who .role-chip { display: none; }
-  .nav .brand { font-size: 16px; margin-right: 0; }
+
+  .nav .brand {
+    font-size: 16px;
+    margin-right: 0;
+  }
 
   .search { width: 100%; }
   .row > mat-form-field { width: 100%; }
+
   .auth-card { margin-top: 4vh; }
+
   .dashboard-grid .mat-mdc-card-title { font-size: 30px; }
 }

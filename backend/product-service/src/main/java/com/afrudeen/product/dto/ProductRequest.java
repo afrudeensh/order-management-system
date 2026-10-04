@@ -1,21 +1,36 @@
 package com.afrudeen.product.dto;
+
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
 import java.math.BigDecimal;
 
 public record ProductRequest(
 
-        @Schema(example = "Fuel Injector")
         @NotBlank
         String name,
 
-        @Schema(example = "1299.00")
         @NotNull
         @DecimalMin("0.01")
         BigDecimal price,
 
-        @Schema(example = "20")
         @NotNull
         @Min(0)
-        Integer stock) {
+        Integer stock,
+
+        @Size(max = 300000, message = "Image is too large")
+        String image,
+
+        @Pattern(
+                regexp = "^#[0-9a-fA-F]{6}$",
+                message = "Color must look like #RRGGBB"
+        )
+        String color
+
+) {
 }

@@ -67,8 +67,10 @@ export class ProductListComponent {
   loading = signal(true);
   error = signal('');
 
-  cols = ['name', 'price', 'stock', 'actions'];
-    dialog: any;
+  cols = this.auth.isAdmin()
+  ? ['image', 'name', 'price', 'stock', 'actions']
+  : ['image', 'name', 'price', 'stock'];
+  dialog: any;
 
   constructor() {
     this.search.valueChanges
