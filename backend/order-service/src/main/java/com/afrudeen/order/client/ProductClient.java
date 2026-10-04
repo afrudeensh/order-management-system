@@ -12,4 +12,10 @@ public interface ProductClient {
     BaseResponse<ProductResponse> findById(
             @PathVariable("id") Long id
     );
+
+    @PutMapping("/products/{id}/stock/decrease")
+    void decreaseStock(
+            @PathVariable("id") Long id,
+            @RequestParam("quantity") int quantity
+    );
 }

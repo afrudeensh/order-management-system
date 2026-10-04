@@ -122,6 +122,16 @@ export class OrdersComponent {
     });
   }
 
+  loadProducts(): void {
+  this.productApi.getAll().subscribe({
+    next: (products) =>
+         this.products.set(products),
+
+    error: (err) =>
+         this.error.set(errorMessage(err)),
+    });
+  }
+
   place(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -158,6 +168,7 @@ export class OrdersComponent {
         this.placing.set(false);
 
         this.loadOrders();
+        this.loadProducts();
         this.notificationStore.refreshSoon();
       },
 

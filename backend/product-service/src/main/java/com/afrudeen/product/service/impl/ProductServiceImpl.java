@@ -1,5 +1,6 @@
 package com.afrudeen.product.service.impl;
 
+import com.afrudeen.product.common.BusinessException;
 import com.afrudeen.product.dto.ProductRequest;
 import com.afrudeen.product.entity.Product;
 import com.afrudeen.product.repository.ProductRepository;
@@ -70,5 +71,13 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id " + id));
         product.setIsActive(false);
         productRepository.save(product);
+    }
+
+    @Transactional
+    public void decreaseStock(Long id, int qty) {
+        findById(id);   // throws 404 if the product doesn't exist
+        if (productRepository.decreaseStock(id, qty) == 0) {
+            throw new BusinessException("Insufficient stock for product " + id);
+        }
     }
 }

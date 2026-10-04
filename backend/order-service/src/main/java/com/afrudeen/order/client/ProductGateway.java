@@ -1,6 +1,7 @@
 package com.afrudeen.order.client;
 
 import com.afrudeen.order.common.BaseResponse;
+import com.afrudeen.order.common.BusinessException;
 import com.afrudeen.order.common.ResourceNotFoundException;
 import com.afrudeen.order.common.ServiceUnavailableException;
 import com.afrudeen.order.dto.response.ProductResponse;
@@ -60,5 +61,22 @@ public class ProductGateway {
                 "Product service is unavailable right now. " +
                         "Please try again shortly."
         );
+    }
+
+    public void decreaseStock(Long id, int quantity) {
+
+        try {
+
+            client.decreaseStock(id, quantity);
+
+        } catch (FeignException.NotFound e) {
+
+            throw new ResourceNotFoundException("Product not found: " + id);
+
+        } catch (FeignException e) {
+
+            throw new BusinessException("Insufficient stock for product " + id);
+
+        }
     }
 }

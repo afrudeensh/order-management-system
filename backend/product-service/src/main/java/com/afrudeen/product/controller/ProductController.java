@@ -55,4 +55,9 @@ public class ProductController {
         service.delete(id);
         return BaseResponse.ok("Product deleted", null);
     }
+
+    @PutMapping("/{id}/stock/decrease")
+    public void decreaseStock(@PathVariable Long id, @RequestParam int quantity) {
+        service.decreaseStock(id, quantity);
+    }
 }

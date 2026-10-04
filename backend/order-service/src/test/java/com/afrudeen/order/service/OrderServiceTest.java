@@ -9,6 +9,7 @@ import com.afrudeen.order.dto.response.ProductResponse;
 import com.afrudeen.order.entity.Order;
 import com.afrudeen.order.event.OrderEventPublisher;
 import com.afrudeen.order.repository.OrderRepository;
+import com.afrudeen.order.service.impl.OrderServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

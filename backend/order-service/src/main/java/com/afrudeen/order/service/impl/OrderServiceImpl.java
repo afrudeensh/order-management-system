@@ -1,4 +1,4 @@
-package com.afrudeen.order.service;
+package com.afrudeen.order.service.impl;
 
 import com.afrudeen.order.client.ProductGateway;
 import com.afrudeen.order.common.BusinessException;
@@ -13,6 +13,7 @@ import com.afrudeen.order.entity.OrderItem;
 import com.afrudeen.order.event.OrderCreatedEvent;
 import com.afrudeen.order.event.OrderEventPublisher;
 import com.afrudeen.order.repository.OrderRepository;
+import com.afrudeen.order.service.OrderService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -52,6 +53,11 @@ public class OrderServiceImpl implements OrderService {
 
         order.setTotalAmount(total); // total computed on the SERVER
         Order saved = repository.save(order);
+
+        for (OrderItemRequest line : request.items()) {
+            products.decreaseStock(line.productId(), line.quantity());
+        }
+
         events.publish(new OrderCreatedEvent(saved.getId(), saved.getUserId(),
                 saved.getTotalAmount(), saved.getCreatedAt()));
         return OrderResponse.from(saved);
