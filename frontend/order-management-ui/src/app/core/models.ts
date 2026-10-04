@@ -36,7 +36,7 @@ export interface Order{
     userId:number;
     totalAmount:number;
     status:string;
-    createdAt:String;
+    createdAt:string;
     items:OrderItem[];
 }
 

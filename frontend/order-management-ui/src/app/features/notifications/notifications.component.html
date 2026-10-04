@@ -1,0 +1,26 @@
+<h2>Notifications</h2>
+
+<mat-list>
+  @for (
+    notification of items();
+    track notification.id
+  ) {
+    <mat-list-item>
+      <mat-icon matListItemIcon>
+        notifications
+      </mat-icon>
+
+      <div matListItemTitle>
+        {{ notification.message }}
+      </div>
+
+      <div matListItemLine>
+        {{ notification.createdAt | date: 'medium' }}
+      </div>
+    </mat-list-item>
+  } @empty {
+    <p>
+      No notifications yet. Place an order!
+    </p>
+  }
+</mat-list>
