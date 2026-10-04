@@ -16,6 +16,7 @@ import {
 import { AuthService } from '../../core/auth.service';
 import { Product } from '../../core/models';
 import { LOW_STOCK_LIMIT } from '../../core/config';
+import { LiveClockComponent } from '../../shared/live-clock.component';
 
 // A product with fewer units than this counts as "low stock"
 
@@ -27,6 +28,7 @@ import { LOW_STOCK_LIMIT } from '../../core/config';
     RouterLink,
     CurrencyPipe,
     TitleCasePipe,
+    LiveClockComponent
   ],
   templateUrl: './dashboard.component.html',
 })

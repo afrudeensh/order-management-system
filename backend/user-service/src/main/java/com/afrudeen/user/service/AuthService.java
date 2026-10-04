@@ -1,6 +1,10 @@
 package com.afrudeen.user.service;
 import com.afrudeen.user.common.*;
-import com.afrudeen.user.dto.*;
+import com.afrudeen.user.dto.request.ChangePasswordRequest;
+import com.afrudeen.user.dto.request.UpdateProfileRequest;
+import com.afrudeen.user.dto.response.AuthResponse;
+import com.afrudeen.user.dto.response.LoginRequest;
+import com.afrudeen.user.dto.response.RegisterRequest;
 import com.afrudeen.user.entity.*;
 import com.afrudeen.user.enums.Role;
 import com.afrudeen.user.repository.UserRepository;
@@ -46,6 +50,44 @@ public class AuthService {
         }
 
         return toResponse(user);
+    }
+
+    @Transactional
+    public AuthResponse updateProfile(Long userId, UpdateProfileRequest r) {
+        User user = users.findById(userId)
+                .orElseThrow(() -> new UnauthorizedException("User no longer exists"));
+
+        String name = r.name().trim();
+        String email = r.email().trim();
+
+        if (!user.getEmail().equalsIgnoreCase(email)) {
+            if (r.currentPassword() == null || !encoder.matches(r.currentPassword(), user.getPassword())) {
+                throw new BusinessException("Current password is incorrect");
+            }
+            if (users.existsByEmail(email)) {
+                throw new BusinessException("Email already registered");
+            }
+            user.setEmail(email);
+        }
+
+        user.setName(name);
+        return toResponse(users.save(user));       // new token with the new name and email
+    }
+
+    @Transactional
+    public void changePassword(Long userId, ChangePasswordRequest r) {
+        User user = users.findById(userId)
+                .orElseThrow(() -> new UnauthorizedException("User no longer exists"));
+
+        if (!encoder.matches(r.currentPassword(), user.getPassword())) {
+            throw new BusinessException("Current password is incorrect");
+        }
+        if (encoder.matches(r.newPassword(), user.getPassword())) {
+            throw new BusinessException("New password must be different from the current one");
+        }
+
+        user.setPassword(encoder.encode(r.newPassword()));
+        users.save(user);
     }
 
     private AuthResponse toResponse(User user) {

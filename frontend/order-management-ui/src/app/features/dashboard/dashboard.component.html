@@ -1,4 +1,7 @@
-<h2>Welcome, {{ auth.user()?.name | titlecase }}</h2>
+<div class="page-head">
+  <h2>Welcome, {{ auth.user()?.name | titlecase }}</h2>
+  <app-live-clock />
+</div>
 
 @if (auth.isAdmin()) {
   <div class="dashboard-grid">

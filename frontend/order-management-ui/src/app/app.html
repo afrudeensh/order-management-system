@@ -22,14 +22,37 @@
 
     <span class="spacer"></span>
 
-    <span class="who">
+    <!-- Avatar + name: click to open the account menu -->
+    <button
+      type="button"
+      class="who"
+      [matMenuTriggerFor]="userMenu"
+      aria-label="Account menu"
+    >
       <span class="avatar">{{ auth.user()?.name?.charAt(0) | uppercase }}</span>
       <span class="name">{{ auth.user()?.name | titlecase }}</span>
 
       @if (auth.isAdmin()) {
         <span class="role-chip">Admin</span>
       }
-    </span>
+    </button>
+
+    <mat-menu #userMenu="matMenu" xPosition="before">
+      <div class="menu-head">
+        <strong>{{ auth.user()?.name | titlecase }}</strong>
+        <span class="muted">{{ auth.user()?.email }}</span>
+      </div>
+
+      <button mat-menu-item (click)="openAccount()">
+        <mat-icon>settings</mat-icon>
+        <span>Account settings</span>
+      </button>
+
+      <button mat-menu-item (click)="auth.logout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
 
     <button mat-stroked-button class="logout-desktop" (click)="auth.logout()">
       Logout
@@ -68,6 +91,10 @@
           @if (store.unread() > 0) { ({{ store.unread() }}) }
         </span>
       </a>
+      <button mat-menu-item (click)="openAccount()">
+        <mat-icon>settings</mat-icon>
+        <span>Account settings</span>
+      </button>
       <button mat-menu-item (click)="auth.logout()">
         <mat-icon>logout</mat-icon>
         <span>Logout</span>

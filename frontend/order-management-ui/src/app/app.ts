@@ -3,6 +3,7 @@ import { TitleCasePipe, UpperCasePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -11,6 +12,7 @@ import { interval } from 'rxjs';
 
 import { AuthService } from './core/auth.service';
 import { NotificationStore } from './core/notification-store.service';
+import { AccountDialogComponent } from './shared/account-dialog.component';
 
 @Component({
   selector: 'app-root',
@@ -34,6 +36,7 @@ export class App {
 
   auth = inject(AuthService);
   store = inject(NotificationStore);
+  private dialog = inject(MatDialog);
 
   constructor() {
     effect(() => {
@@ -51,5 +54,12 @@ export class App {
           this.store.refresh();
         }
       });
+  }
+
+  openAccount(): void {
+    this.dialog.open(AccountDialogComponent, {
+      width: '480px',
+      maxWidth: '92vw',
+    });
   }
 }

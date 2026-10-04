@@ -1,4 +1,4 @@
-package com.afrudeen.user.dto;
+package com.afrudeen.user.dto.response;
 
 public record AuthResponse(
         String token,

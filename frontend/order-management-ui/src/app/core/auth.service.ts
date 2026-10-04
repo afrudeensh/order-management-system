@@ -40,6 +40,20 @@ export class AuthService {
       .pipe(tap((res) => this.save(res)));
   }
 
+  updateProfile(body: {
+     name: string;
+     email: string;
+     currentPassword: string | null
+     }) {
+       return this.http
+        .put<AuthResponse>(`${API_URL}/users/me`, body)
+        .pipe(tap((res) => this.save(res)));    // new token + name shown everywhere
+  }
+
+   changePassword(body: { currentPassword: string; newPassword: string }) {
+      return this.http.put<{ message: string }>(`${API_URL}/users/me/password`, body);
+  }
+
   logout(): void {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
