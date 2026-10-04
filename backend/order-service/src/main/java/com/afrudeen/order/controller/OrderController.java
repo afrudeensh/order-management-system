@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import com.afrudeen.order.common.ForbiddenException;
 
 import java.util.List;
 
@@ -42,5 +43,14 @@ public class OrderController {
                              @RequestHeader("X-User-Id") Long userId,
                              @RequestHeader("X-User-Role") String role) {
         return service.findById(id, userId, "ADMIN".equals(role));
+    }
+
+    @GetMapping
+    @Operation(summary = "All orders (admin only)")
+    public List<OrderResponse> all(@RequestHeader("X-User-Role") String role) {
+        if (!"ADMIN".equals(role)) {
+            throw new ForbiddenException("Admin only");
+        }
+        return service.findAll();
     }
 }

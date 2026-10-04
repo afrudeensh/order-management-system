@@ -59,6 +59,10 @@ export class OrderApi {
   mine() {
     return this.http.get<Order[]>(`${this.url}/my`);
   }
+
+  all() {
+    return this.http.get<Order[]>(this.url);   // admin only
+  }
 }
 
 @Injectable({

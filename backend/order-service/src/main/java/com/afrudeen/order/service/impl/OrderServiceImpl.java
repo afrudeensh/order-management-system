@@ -64,7 +64,7 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
-
+    @Override
     @Transactional(readOnly = true)
     public OrderResponse findById(Long id, Long userId, boolean admin) {
 
@@ -79,6 +79,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
+    @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> findMine(Long userId) {
 
@@ -87,6 +88,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
 
+    @Override
     @Transactional(readOnly = true)
     public List<OrderResponse> findAll() {
         return repository.findAll()

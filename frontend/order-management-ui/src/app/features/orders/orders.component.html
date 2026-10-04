@@ -1,121 +1,100 @@
-<h2>Place an order</h2>
+@if (!auth.isAdmin()) {
+  <h2>Place an order</h2>
 
-<form
-  [formGroup]="form"
-  (ngSubmit)="place()"
->
-  <div formArrayName="lines">
-    @for (
-      line of lines;
-      track $index;
-      let i = $index
-    ) {
-      <mat-card class="order-line">
-        <mat-card-content>
-          <div
-            class="row"
-            [formGroupName]="i"
-          >
-            <mat-form-field appearance="outline">
-              <mat-label>Product</mat-label>
+  <form [formGroup]="form" (ngSubmit)="place()">
+    <div formArrayName="lines">
+      @for (line of lines; track $index; let i = $index) {
+        <mat-card class="order-line">
+          <mat-card-content>
+            <div class="row" [formGroupName]="i">
+              <mat-form-field appearance="outline">
+                <mat-label>Product</mat-label>
 
-              <mat-select formControlName="productId">
-                @for (
-                  product of products();
-                  track product.id
+                <mat-select formControlName="productId">
+                  @for (product of products(); track product.id) {
+                    <mat-option [value]="product.id">
+                      {{ product.name }}
+                      -
+                      {{ product.price | currency: 'INR' }}
+                      (stock {{ product.stock }})
+                    </mat-option>
+                  }
+                </mat-select>
+
+                @if (
+                  line.controls.productId.touched &&
+                  line.controls.productId.invalid
                 ) {
-                  <mat-option [value]="product.id">
-                    {{ product.name }}
-                    -
-                    {{ product.price | currency: 'INR' }}
-                    (stock {{ product.stock }})
-                  </mat-option>
+                  <mat-error>Product is required</mat-error>
                 }
-              </mat-select>
+              </mat-form-field>
 
-              @if (
-                line.controls.productId.touched &&
-                line.controls.productId.invalid
-              ) {
-                <mat-error>
-                  Product is required
-                </mat-error>
-              }
-            </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Qty</mat-label>
 
-            <mat-form-field appearance="outline">
-              <mat-label>Qty</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  min="1"
+                  formControlName="quantity"
+                />
 
-              <input
-                matInput
-                type="number"
-                min="1"
-                formControlName="quantity"
-              />
+                @if (
+                  line.controls.quantity.touched &&
+                  line.controls.quantity.invalid
+                ) {
+                  <mat-error>Quantity must be at least 1</mat-error>
+                }
+              </mat-form-field>
 
-              @if (
-                line.controls.quantity.touched &&
-                line.controls.quantity.invalid
-              ) {
-                <mat-error>
-                  Quantity must be at least 1
-                </mat-error>
-              }
-            </mat-form-field>
+              <button
+                mat-icon-button
+                type="button"
+                color="warn"
+                (click)="removeLine(i)"
+                [disabled]="lines.length === 1"
+                aria-label="Remove item"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
 
-            <button
-              mat-icon-button
-              type="button"
-              color="warn"
-              (click)="removeLine(i)"
-              [disabled]="lines.length === 1"
-              aria-label="Remove item"
-            >
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    }
-  </div>
+    <div class="row">
+      <button mat-button type="button" (click)="addLine()">
+        <mat-icon>add</mat-icon>
+        Add item
+      </button>
 
-  <div class="row">
-    <button
-      mat-button
-      type="button"
-      (click)="addLine()"
-    >
-      <mat-icon>add</mat-icon>
-      Add item
-    </button>
-
-    <button
-      mat-flat-button
-      color="primary"
-      type="submit"
-      [disabled]="placing() || form.invalid"
-    >
-      {{ placing() ? 'Placing...' : 'Place order' }}
-    </button>
-  </div>
-</form>
-
-@if (error()) {
-  <p class="error">
-    {{ error() }}
-  </p>
+      <button
+        mat-flat-button
+        type="submit"
+        [disabled]="placing() || form.invalid"
+      >
+        {{ placing() ? 'Placing...' : 'Place order' }}
+      </button>
+    </div>
+  </form>
 }
 
-<h2>My orders</h2>
+@if (error()) {
+  <p class="error">{{ error() }}</p>
+}
+
+<h2>{{ auth.isAdmin() ? 'All orders' : 'My orders' }}</h2>
 
 @for (order of orders(); track order.id) {
   <mat-card class="order-card">
     <mat-card-header>
-      <mat-card-title>
-        Order #{{ order.id }}
-      </mat-card-title>
+      <mat-card-title>Order #{{ order.id }}</mat-card-title>
 
       <mat-card-subtitle>
+        @if (auth.isAdmin()) {
+          Customer #{{ order.userId }} ·
+        }
         {{ order.status }}
         ·
         {{ order.createdAt | date: 'medium' }}
@@ -123,36 +102,21 @@
     </mat-card-header>
 
     <mat-card-content>
-      @for (
-        item of order.items;
-        track item.productId
-      ) {
+      @for (item of order.items; track item.productId) {
         <div class="order-item">
-          <span>
-            {{ item.productName }}
-            x
-            {{ item.quantity }}
-          </span>
-
-          <span>
-            {{ item.lineTotal | currency: 'INR' }}
-          </span>
+          <span>{{ item.productName }} x {{ item.quantity }}</span>
+          <span>{{ item.lineTotal | currency: 'INR' }}</span>
         </div>
       }
 
       <div class="order-total">
-        <strong>
-          Total (calculated)
-        </strong>
-
-        <strong>
-          {{ order.totalAmount | currency: 'INR' }}
-        </strong>
+        <strong>Total</strong>
+        <strong>{{ order.totalAmount | currency: 'INR' }}</strong>
       </div>
     </mat-card-content>
   </mat-card>
 } @empty {
   <p>
-    You have not placed any orders yet.
+    {{ auth.isAdmin() ? 'No orders have been placed yet.' : 'You have not placed any orders yet.' }}
   </p>
 }

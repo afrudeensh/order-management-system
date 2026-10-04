@@ -30,6 +30,7 @@ import {
 
 import { errorMessage } from '../../core/http-error';
 import { NotificationStore } from '../../core/notification-store.service';
+import { AuthService } from '../../core/auth.service';
 
 @Component({
   selector: 'app-orders',
@@ -52,6 +53,7 @@ export class OrdersComponent {
   private orderApi = inject(OrderApi);
   private snack = inject(MatSnackBar);
   private notificationStore = inject(NotificationStore);
+  auth = inject(AuthService);
 
   // The <form [formGroup]> in the template, used to clear the "submitted" state
   private formDir = viewChild(FormGroupDirective);
@@ -73,7 +75,10 @@ export class OrdersComponent {
   }
 
   constructor() {
+     // Only customers need the product list, because only they place orders
+  if (!this.auth.isAdmin()) {
     this.loadProducts();
+  }
     this.loadOrders();
   }
 
@@ -117,15 +122,20 @@ export class OrdersComponent {
   }
 
   loadOrders(): void {
-    this.orderApi.mine().subscribe({
-      next: (orders) => {
-        this.orders.set(orders);
-      },
+    const request = this.auth.isAdmin()
+    ? this.orderApi.all()
+    : this.orderApi.mine();
 
-      error: (err) => {
-        this.error.set(errorMessage(err));
-      },
-    });
+  request.subscribe({
+    next: (orders) => {
+      // Newest first
+      this.orders.set([...orders].sort((a, b) => b.id - a.id));
+    },
+
+    error: (err) => {
+      this.error.set(errorMessage(err));
+    },
+  });
   }
 
   place(): void {
