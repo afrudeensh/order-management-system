@@ -1,8 +1,10 @@
 package com.afrudeen.product.service;
 
+import com.afrudeen.product.dto.PageResponse;
 import com.afrudeen.product.dto.ProductRequest;
 import com.afrudeen.product.entity.Product;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 public interface ProductService {
@@ -20,4 +22,6 @@ public interface ProductService {
     void decreaseStock(Long id, int qty);
 
     Product increaseStock(Long id, int qty);
+
+    PageResponse<Product> page(String search, Pageable pageable);
 }

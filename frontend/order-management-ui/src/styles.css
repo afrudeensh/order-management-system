@@ -113,7 +113,7 @@ h2 {
   flex: 1 1 auto;
 }
 
-/* Navbar: avatar + name is now a button */
+/* Navbar: avatar + name is a button that opens the account menu */
 button.who {
   display: flex;
   align-items: center;
@@ -390,6 +390,30 @@ input[type="color"]::-moz-color-swatch {
   padding-top: 10px;
 }
 
+/* Orders list header: title on the left, sort dropdown on the right */
+.list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.list-head h2 {
+  margin: 0;
+}
+
+.sort-field {
+  width: 200px;
+  max-width: 100%;
+}
+
+.orders-paginator {
+  margin-top: 8px;
+  border-radius: var(--radius);
+}
+
 
 /* ==========================================================================
    6. TABLES & PRODUCTS
@@ -409,6 +433,10 @@ input[type="color"]::-moz-color-swatch {
 .table-wrap table {
   width: 100%;
   min-width: 680px;
+  background: transparent;
+}
+
+.table-wrap mat-paginator {
   background: transparent;
 }
 
@@ -560,6 +588,10 @@ input[type="color"]::-moz-color-swatch {
   }
 
   .row > mat-form-field {
+    width: 100%;
+  }
+
+  .sort-field {
     width: 100%;
   }
 

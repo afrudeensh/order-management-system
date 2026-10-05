@@ -7,6 +7,7 @@ import com.afrudeen.order.common.ResourceNotFoundException;
 import com.afrudeen.order.dto.request.CreateOrderRequest;
 import com.afrudeen.order.dto.request.OrderItemRequest;
 import com.afrudeen.order.dto.response.OrderResponse;
+import com.afrudeen.order.dto.response.PageResponse;
 import com.afrudeen.order.dto.response.ProductResponse;
 import com.afrudeen.order.entity.Order;
 import com.afrudeen.order.entity.OrderItem;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -157,5 +159,23 @@ public class OrderServiceImpl implements OrderService {
             products.increaseStock(item.getProductId(), item.getQuantity());
         }
         return OrderResponse.from(o);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> findMinePage(Long userId, Pageable pageable) {
+        return PageResponse.from(
+                repository.findByUserId(userId, pageable)
+                        .map(OrderResponse::from)
+        );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<OrderResponse> findAllPage(Pageable pageable) {
+        return PageResponse.from(
+                repository.findAll(pageable)
+                        .map(OrderResponse::from)
+        );
     }
 }

@@ -1,16 +1,21 @@
 package com.afrudeen.product.controller;
 
 import com.afrudeen.product.common.BaseResponse;
+import com.afrudeen.product.dto.PageResponse;
 import com.afrudeen.product.dto.ProductRequest;
 import com.afrudeen.product.entity.Product;
 import com.afrudeen.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/products")
@@ -22,6 +27,8 @@ public class ProductController {
     public ProductController(ProductService service) {
         this.service = service;
     }
+
+    private static final Set<String> SORTABLE = Set.of("id", "name", "price", "stock");
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -64,5 +71,28 @@ public class ProductController {
     @PutMapping("/{id}/stock/increase")
     public Product increaseStock(@PathVariable Long id, @RequestParam int quantity) {
         return service.increaseStock(id, quantity);
+    }
+
+    @GetMapping("/page")
+    @Operation(summary = "Paged and sorted product list")
+    public BaseResponse<PageResponse<Product>> page(
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        return BaseResponse.ok(service.page(search, pageable(page, size, sort, direction)));
+    }
+
+    private Pageable pageable(int page, int size, String sort, String direction) {
+        String field = SORTABLE.contains(sort) ? sort : "name";
+        Sort.Direction dir = "desc".equalsIgnoreCase(direction) ? Sort.Direction.DESC : Sort.Direction.ASC;
+
+        Sort order = Sort.by(dir, field);
+        if (!field.equals("id")) {
+            order = order.and(Sort.by("id"));      // tie-breaker, so pages never overlap
+        }
+        return (Pageable) PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 50), order);
     }
 }

@@ -12,14 +12,18 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSortModule, Sort } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 
 import {
+  Subject,
   catchError,
   debounceTime,
   distinctUntilChanged,
+  merge,
   of,
   startWith,
   switchMap,
@@ -41,6 +45,8 @@ import { ConfirmService } from '../../shared/confirm-dialog.component';
     CurrencyPipe,
     RouterLink,
     MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
     MatButtonModule,
     MatIconModule,
     MatFormFieldModule,
@@ -59,51 +65,81 @@ export class ProductListComponent {
 
   lowLimit = LOW_STOCK_LIMIT;
 
-  search = new FormControl('', {
-    nonNullable: true,
-  });
+  search = new FormControl('', { nonNullable: true });
 
   products = signal<Product[]>([]);
+  total = signal(0);
+  pageIndex = signal(0);
+  pageSize = signal(10);
+  sortField = signal('name');
+  sortDir = signal<'asc' | 'desc'>('asc');
+
   loading = signal(true);
   error = signal('');
 
   cols = this.auth.isAdmin()
-    ? ['image', 'color', 'name', 'price', 'stock', 'actions']
-    : ['image', 'color', 'name', 'price', 'stock'];
+    ? ['image', 'name', 'color', 'price', 'stock', 'actions']
+    : ['image', 'name', 'color', 'price', 'stock'];
+
+  private reload = new Subject<void>();
 
   constructor() {
-    this.search.valueChanges
-      .pipe(
-        startWith(''),
-
-        // Wait until the user stops typing
+    merge(
+      // typing in the search box: wait, then go back to page 1
+      this.search.valueChanges.pipe(
         debounceTime(300),
-
         distinctUntilChanged(),
+        tap(() => this.pageIndex.set(0)),
+      ),
+      // page change, sort change, delete, ...
+      this.reload,
+    )
+      .pipe(
+        startWith(null),                        // first load
 
         tap(() => {
           this.loading.set(true);
           this.error.set('');
         }),
 
-        // Cancels the previous request
-        switchMap((query) =>
-          this.api.getAll(query).pipe(
-            catchError((err) => {
-              this.error.set(errorMessage(err));
-
-              return of([] as Product[]);
-            }),
-          ),
+        // cancels the previous request if a new one starts
+        switchMap(() =>
+          this.api
+            .page({
+              search: this.search.value.trim(),
+              page: this.pageIndex(),
+              size: this.pageSize(),
+              sort: this.sortField(),
+              direction: this.sortDir(),
+            })
+            .pipe(
+              catchError((err) => {
+                this.error.set(errorMessage(err));
+                return of(null);
+              }),
+            ),
         ),
 
-        // Automatically unsubscribe when component is destroyed
         takeUntilDestroyed(),
       )
-      .subscribe((list) => {
-        this.products.set(list);
+      .subscribe((res) => {
+        this.products.set(res?.content ?? []);
+        this.total.set(res?.totalElements ?? 0);
         this.loading.set(false);
       });
+  }
+
+  onPage(e: PageEvent): void {
+    this.pageIndex.set(e.pageIndex);
+    this.pageSize.set(e.pageSize);
+    this.reload.next();
+  }
+
+  onSort(s: Sort): void {
+    this.sortField.set(s.active);
+    this.sortDir.set(s.direction === 'desc' ? 'desc' : 'asc');
+    this.pageIndex.set(0);
+    this.reload.next();
   }
 
   remove(product: Product): void {
@@ -119,9 +155,11 @@ export class ProductListComponent {
 
         this.api.delete(product.id).subscribe({
           next: () => {
-            this.products.update((list) =>
-              list.filter((item) => item.id !== product.id),
-            );
+            // deleted the last row of a page: step back one page
+            if (this.products().length === 1 && this.pageIndex() > 0) {
+              this.pageIndex.update((i) => i - 1);
+            }
+            this.reload.next();
             this.snack.open('Product deleted', 'OK', { duration: 2500 });
           },
           error: (err) => {

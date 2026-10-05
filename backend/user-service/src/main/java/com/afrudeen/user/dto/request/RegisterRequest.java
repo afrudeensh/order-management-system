@@ -1,4 +1,4 @@
-package com.afrudeen.user.dto.response;
+package com.afrudeen.user.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -28,12 +28,34 @@ export interface OrderItemRequest {
   quantity: number;
 }
 
+export interface UserSummary {
+  id: number;
+  name: string;
+  email: string;
+}
+
 export interface OrderItem {
   productId: number;
   productName: string;
   quantity: number;
   unitPrice: number;
   lineTotal: number;
+}
+
+export interface PageResponse<T> {
+  content: T[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
+export interface PageQuery {
+  page: number;
+  size: number;
+  sort: string;
+  direction: string;
+  search?: string;
 }
 
 export interface Order {

@@ -2,15 +2,18 @@ package com.afrudeen.product.service.impl;
 
 import com.afrudeen.product.common.BusinessException;
 import com.afrudeen.product.common.ResourceNotFoundException;
+import com.afrudeen.product.dto.PageResponse;
 import com.afrudeen.product.dto.ProductRequest;
 import com.afrudeen.product.entity.Product;
 import com.afrudeen.product.repository.ProductRepository;
 import com.afrudeen.product.service.ProductService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @Service
@@ -114,6 +117,15 @@ public class ProductServiceImpl implements ProductService {
         getAny(id);
         productRepository.increaseStock(id, qty);   // atomic: stock = stock + qty
         return getAny(id);                          // fresh row
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<Product> page(String search, Pageable pageable) {
+        Page<Product> result = (search == null || search.isBlank())
+                ? productRepository.findByIsActiveTrue(pageable)
+                : productRepository.findByIsActiveTrueAndNameContainingIgnoreCase(search.trim(), pageable);
+        return PageResponse.from(result);
     }
 
     private Product getAny(Long id) {

@@ -4,7 +4,8 @@ import com.afrudeen.user.dto.request.ChangePasswordRequest;
 import com.afrudeen.user.dto.request.UpdateProfileRequest;
 import com.afrudeen.user.dto.response.AuthResponse;
 import com.afrudeen.user.dto.response.LoginRequest;
-import com.afrudeen.user.dto.response.RegisterRequest;
+import com.afrudeen.user.dto.request.RegisterRequest;
+import com.afrudeen.user.dto.response.UserSummary;
 import com.afrudeen.user.entity.*;
 import com.afrudeen.user.enums.Role;
 import com.afrudeen.user.repository.UserRepository;
@@ -12,6 +13,8 @@ import com.afrudeen.user.security.JwtService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class AuthService {
@@ -88,6 +91,16 @@ public class AuthService {
 
         user.setPassword(encoder.encode(r.newPassword()));
         users.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserSummary> lookup(List<Long> ids) {
+        if (ids.size() > 100) {
+            throw new BusinessException("Too many ids");
+        }
+        return users.findAllById(ids).stream()
+                .map(u -> new UserSummary(u.getId(), u.getName(), u.getEmail()))
+                .toList();
     }
 
     private AuthResponse toResponse(User user) {

@@ -3,7 +3,7 @@ package com.afrudeen.user.controller;
 import com.afrudeen.user.common.BaseResponse;
 import com.afrudeen.user.dto.response.AuthResponse;
 import com.afrudeen.user.dto.response.LoginRequest;
-import com.afrudeen.user.dto.response.RegisterRequest;
+import com.afrudeen.user.dto.request.RegisterRequest;
 import com.afrudeen.user.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;

@@ -1,12 +1,14 @@
 package com.afrudeen.product.repository;
 
 import com.afrudeen.product.entity.Product;
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,4 +32,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsByNameIgnoreCase(String name);
 
     boolean existsByNameIgnoreCaseAndIdNot(String name, Long id);
+
+    Page<Product> findByIsActiveTrue(Pageable pageable);
+
+    Page<Product> findByIsActiveTrueAndNameContainingIgnoreCase(String name, Pageable pageable);
 }
