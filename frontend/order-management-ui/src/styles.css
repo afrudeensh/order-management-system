@@ -15,6 +15,7 @@
 /* ==========================================================================
    1. DESIGN TOKENS
    ========================================================================== */
+
 :root {
   --space: 16px;
   --radius: 14px;
@@ -34,6 +35,7 @@
 /* ==========================================================================
    2. BASE / RESET
    ========================================================================== */
+
 * {
   box-sizing: border-box;
 }
@@ -65,6 +67,7 @@ h2 {
 /* ==========================================================================
    3. NAVBAR
    ========================================================================== */
+
 .nav {
   --mat-toolbar-container-background-color: var(--primary);
   --mat-toolbar-container-text-color: #fff;
@@ -113,7 +116,9 @@ h2 {
   flex: 1 1 auto;
 }
 
-/* Navbar: avatar + name is a button that opens the account menu */
+
+/* Navbar: avatar + name button */
+
 button.who {
   display: flex;
   align-items: center;
@@ -168,13 +173,13 @@ button.who:hover {
 /* ==========================================================================
    4. LAYOUT HELPERS
    ========================================================================== */
+
 .page {
   max-width: 1000px;
   margin: 0 auto;
   padding: 24px var(--space);
 }
 
-/* Page header with title on the left and the clock on the right */
 .page-head {
   display: flex;
   justify-content: space-between;
@@ -209,11 +214,14 @@ button.who:hover {
 /* ==========================================================================
    5. CARDS
    ========================================================================== */
+
 mat-card {
   border-radius: var(--radius);
 }
 
-/* ---------- Auth card (Sign in / Register) ---------- */
+
+/* ---------- Auth card ---------- */
+
 .auth-card {
   width: calc(100% - 32px);
   max-width: 420px;
@@ -221,8 +229,6 @@ mat-card {
   padding: 16px;
 }
 
-/* Header sizes to its content; content gets top space because
-   outline labels float above the field's top border. */
 .auth-card .mat-mdc-card-header {
   height: auto;
   min-height: 0;
@@ -241,7 +247,9 @@ mat-card {
   padding: 0 16px 16px;
 }
 
-/* ---------- Form card (add / edit product) ---------- */
+
+/* ---------- Form card ---------- */
+
 .form-card {
   max-width: 640px;
   margin: 0 auto;
@@ -291,33 +299,59 @@ mat-card {
   margin-top: 8px;
 }
 
-/* Round color picker */
-input[type="color"] {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border: 2px solid #e5e7eb;
-  border-radius: 50%;
+
+/* ---------- Color box (gradient of the chosen color, no border) ---------- */
+
+.color-box {
+  --c: #4f46e5;
+
+  position: relative;
+  display: inline-block;
+  flex: none;
+
+  width: 42px;
+  height: 42px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--c) 55%, white) 0%,
+    var(--c) 50%,
+    color-mix(in srgb, var(--c) 70%, black) 100%
+  );
+
+  cursor: pointer;
   overflow: hidden;
-  background: none;
+  transition: transform 0.15s ease;
+}
+
+.color-box:hover {
+  transform: scale(1.06);
+}
+
+
+/* Native picker stays functional but invisible, stretched over the box */
+
+.color-box input[type="color"] {
+  position: absolute;
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  opacity: 0;
   cursor: pointer;
 }
 
-input[type="color"]::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-input[type="color"]::-webkit-color-swatch {
-  border: 0;
-  border-radius: 50%;
-}
-
-input[type="color"]::-moz-color-swatch {
-  border: 0;
-  border-radius: 50%;
-}
 
 /* ---------- Dashboard ---------- */
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -338,7 +372,9 @@ input[type="color"]::-moz-color-swatch {
   color: var(--danger);
 }
 
+
 /* ---------- Low stock list ---------- */
+
 .low-stock {
   margin-top: var(--space);
   padding: 16px;
@@ -360,7 +396,9 @@ input[type="color"]::-moz-color-swatch {
   border-bottom: 0;
 }
 
+
 /* ---------- Orders ---------- */
+
 .order-line {
   margin-bottom: 12px;
   padding: 8px;
@@ -390,7 +428,9 @@ input[type="color"]::-moz-color-swatch {
   padding-top: 10px;
 }
 
-/* Orders list header: title on the left, sort dropdown on the right */
+
+/* Orders list header */
+
 .list-head {
   display: flex;
   justify-content: space-between;
@@ -418,6 +458,7 @@ input[type="color"]::-moz-color-swatch {
 /* ==========================================================================
    6. TABLES & PRODUCTS
    ========================================================================== */
+
 .search {
   width: 320px;
   max-width: 100%;
@@ -440,7 +481,9 @@ input[type="color"]::-moz-color-swatch {
   background: transparent;
 }
 
+
 /* Product thumbnail */
+
 .thumb {
   width: 44px;
   height: 44px;
@@ -457,29 +500,49 @@ input[type="color"]::-moz-color-swatch {
   color: #9ca3af;
 }
 
-/* Round color swatch in the Color column */
+
+/* Color swatch in Color column: gradient fill, no border */
+
 .swatch {
+  --c: #4f46e5;
+
   display: inline-block;
   width: 22px;
   height: 22px;
-  border-radius: 50%;
-  border: 2px solid #fff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+
+  border: 0;
+  border-radius: 4px;
+  box-shadow: none;
+
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--c) 55%, white) 0%,
+    var(--c) 50%,
+    color-mix(in srgb, var(--c) 70%, black) 100%
+  );
+
   vertical-align: middle;
 }
 
-/* Small color dot (used beside a name) */
+
+/* Small square color indicator */
+
 .dot {
   display: inline-block;
   width: 14px;
   height: 14px;
-  border-radius: 50%;
+
+  border-radius: 3px;
   margin-right: 8px;
+
   border: 1px solid rgba(0, 0, 0, 0.2);
+
   vertical-align: middle;
 }
 
-/* Keep the action icons on one line */
+
+/* Keep action icons on one line */
+
 .actions {
   display: flex;
   align-items: center;
@@ -491,6 +554,7 @@ input[type="color"]::-moz-color-swatch {
 /* ==========================================================================
    7. STATUS / CHIPS / TEXT UTILITIES
    ========================================================================== */
+
 .error {
   color: var(--danger);
 }
@@ -499,12 +563,17 @@ input[type="color"]::-moz-color-swatch {
   color: var(--muted);
 }
 
-/* Stock chips */
+
+/* ---------- Stock chips ---------- */
+
 .stock-chip {
   background: #fee2e2;
   color: #b91c1c;
+
   padding: 2px 10px;
+
   border-radius: 999px;
+
   font-size: 12px;
   font-weight: 600;
 }
@@ -514,13 +583,19 @@ input[type="color"]::-moz-color-swatch {
   color: #fff;
 }
 
-/* Order status chips */
+
+/* ---------- Order status chips ---------- */
+
 .status {
   display: inline-block;
+
   padding: 1px 10px;
+
   border-radius: 999px;
+
   font-size: 12px;
   font-weight: 600;
+
   background: #e5e7eb;
   color: #374151;
 }
@@ -550,7 +625,9 @@ input[type="color"]::-moz-color-swatch {
   color: #b91c1c;
 }
 
-/* ---------- Customer hover card (admin orders) ---------- */
+
+/* ---------- Customer hover card ---------- */
+
 .cust {
   position: relative;
   display: inline-block;
@@ -565,45 +642,65 @@ input[type="color"]::-moz-color-swatch {
 
 .cust-card {
   display: none;
+
   position: absolute;
   top: calc(100% + 10px);
   left: 0;
+
   z-index: 30;
+
   align-items: center;
   gap: 12px;
+
   min-width: 240px;
   max-width: 80vw;
+
   padding: 12px 14px;
+
   background: #fff;
   color: #1f2937;
+
   border: 1px solid #e5e7eb;
   border-radius: 12px;
+
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+
   font-weight: 400;
   white-space: nowrap;
 }
 
-/* small arrow pointing at the name */
+
+/* Small arrow */
+
 .cust-card::before {
   content: '';
+
   position: absolute;
   top: -6px;
   left: 18px;
+
   width: 10px;
   height: 10px;
+
   background: #fff;
+
   border-left: 1px solid #e5e7eb;
   border-top: 1px solid #e5e7eb;
+
   transform: rotate(45deg);
 }
 
-/* invisible bridge so the card doesn't vanish while the mouse crosses the gap */
+
+/* Invisible bridge */
+
 .cust-card::after {
   content: '';
+
   position: absolute;
   top: -12px;
   left: 0;
   right: 0;
+
   height: 12px;
 }
 
@@ -615,13 +712,18 @@ input[type="color"]::-moz-color-swatch {
 
 .cust-avatar {
   flex: none;
+
   width: 36px;
   height: 36px;
+
   border-radius: 50%;
+
   display: grid;
   place-items: center;
+
   background: var(--primary);
   color: #fff;
+
   font-weight: 600;
   text-transform: uppercase;
 }
@@ -643,8 +745,11 @@ input[type="color"]::-moz-color-swatch {
    8. RESPONSIVE
    ========================================================================== */
 
+
 /* ---------- Tablet ---------- */
+
 @media (max-width: 820px) {
+
   .nav .desktop-links,
   .nav .logout-desktop {
     display: none;
@@ -659,8 +764,11 @@ input[type="color"]::-moz-color-swatch {
   }
 }
 
+
 /* ---------- Phone ---------- */
+
 @media (max-width: 560px) {
+
   .who .name,
   .who .role-chip {
     display: none;

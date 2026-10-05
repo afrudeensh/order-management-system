@@ -1,53 +1,161 @@
 <mat-card class="form-card">
+
   <mat-card-content>
-    <h2 class="form-title">{{ id ? 'Edit product' : 'New product' }}</h2>
 
-    <form [formGroup]="form" (ngSubmit)="save()" class="stack">
+    <h2 class="form-title">
+      {{ id ? 'Edit product' : 'New product' }}
+    </h2>
+
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="save()"
+      class="stack"
+    >
+
+      <!-- NAME -->
+
       <mat-form-field appearance="outline">
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name" />
-        <mat-error>Name is required</mat-error>
+
+        <mat-label>
+          Name
+        </mat-label>
+
+        <input
+          matInput
+          formControlName="name"
+        />
+
+        <mat-error>
+          Name is required
+        </mat-error>
+
       </mat-form-field>
 
+
+      <!-- PRICE -->
+
       <mat-form-field appearance="outline">
-        <mat-label>Price (INR)</mat-label>
-        <input matInput type="number" formControlName="price" />
-        <mat-error>Price must be at least 0.01</mat-error>
+
+        <mat-label>
+          Price (INR)
+        </mat-label>
+
+        <input
+          matInput
+          type="number"
+          formControlName="price"
+        />
+
+        <mat-error>
+          Price must be at least 0.01
+        </mat-error>
+
       </mat-form-field>
 
-      <mat-form-field appearance="outline" subscriptSizing="dynamic">
-        <mat-label>Stock</mat-label>
-        <input matInput type="number" formControlName="stock" />
+
+      <!-- STOCK -->
+
+      <mat-form-field
+        appearance="outline"
+        subscriptSizing="dynamic"
+      >
+
+        <mat-label>
+          Stock
+        </mat-label>
+
+        <input
+          matInput
+          type="number"
+          formControlName="stock"
+        />
+
         @if (id) {
-          <mat-hint>Change stock with "Add stock" on the Products page</mat-hint>
+
+          <mat-hint>
+            Change stock with "Add stock" on the Products page
+          </mat-hint>
+
         }
-        <mat-error>Stock cannot be negative</mat-error>
+
+        <mat-error>
+          Stock cannot be negative
+        </mat-error>
+
       </mat-form-field>
 
-      <!-- Image (optional) -->
+
+      <!-- IMAGE -->
+
       <div class="field-block">
-        <span class="field-label">Image <span class="muted">(optional)</span></span>
+
+        <span class="field-label">
+
+          Image
+
+          <span class="muted">
+            (optional)
+          </span>
+
+        </span>
+
 
         <div class="upload">
+
           @if (form.controls.image.value; as img) {
-            <img class="preview" [src]="img" alt="Product image preview" />
+
+            <img
+              class="preview"
+              [src]="img"
+              alt="Product image preview"
+            />
+
 
             <div class="row">
-              <button mat-stroked-button type="button" (click)="fileInput.click()">
+
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="fileInput.click()"
+              >
                 Change image
               </button>
-              <button mat-button color="warn" type="button" (click)="removeImage()">
+
+
+              <button
+                mat-button
+                color="warn"
+                type="button"
+                (click)="removeImage()"
+              >
                 Remove
               </button>
+
             </div>
+
           } @else {
+
             <div>
-              <button mat-stroked-button type="button" (click)="fileInput.click()">
-                <mat-icon>upload</mat-icon>
+
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="fileInput.click()"
+              >
+
+                <mat-icon>
+                  upload
+                </mat-icon>
+
                 Upload image
+
               </button>
+
             </div>
+
           }
+
 
           <input
             #fileInput
@@ -57,46 +165,130 @@
             (change)="onFile($event)"
           />
 
+
           @if (imageError()) {
-            <p class="error">{{ imageError() }}</p>
+
+            <p class="error">
+              {{ imageError() }}
+            </p>
+
           }
+
         </div>
+
       </div>
 
-      <!-- Color (optional) -->
+
+      <!-- COLOR -->
+
       <div class="field-block">
-        <span class="field-label">Color <span class="muted">(optional)</span></span>
+
+        <span class="field-label">
+
+          Color
+
+          <span class="muted">
+            (optional)
+          </span>
+
+        </span>
+
 
         <div class="row">
+
           @if (form.controls.color.value; as c) {
-            <input
-              type="color"
-              [value]="c"
-              (input)="onColor($event)"
-              aria-label="Product color"
-            />
-            <span>{{ c }}</span>
-            <button mat-button type="button" (click)="clearColor()">Remove color</button>
-          } @else {
-            <button mat-stroked-button type="button" (click)="addColor()">
-              <mat-icon>palette</mat-icon>
-              Add color
+
+            <!-- Gradient color box (click to open the picker) -->
+
+            <label class="color-box" [style.--c]="c">
+
+              <input
+                type="color"
+                [value]="c"
+                (input)="onColor($event)"
+                aria-label="Product color"
+              />
+
+            </label>
+
+
+            <!-- HEX value -->
+
+            <span>
+              {{ c }}
+            </span>
+
+
+            <!-- Remove color -->
+
+            <button
+              mat-button
+              type="button"
+              (click)="clearColor()"
+            >
+              Remove color
             </button>
+
+          } @else {
+
+            <!-- Add color -->
+
+            <button
+              mat-stroked-button
+              type="button"
+              (click)="addColor()"
+            >
+
+              <mat-icon>
+                palette
+              </mat-icon>
+
+              Add color
+
+            </button>
+
           }
+
         </div>
+
       </div>
 
+
+      <!-- ERROR -->
+
       @if (error()) {
-        <p class="error">{{ error() }}</p>
+
+        <p class="error">
+          {{ error() }}
+        </p>
+
       }
 
+
+      <!-- ACTIONS -->
+
       <div class="row form-actions">
-        <button mat-flat-button type="submit" [disabled]="form.invalid">
+
+        <button
+          mat-flat-button
+          type="submit"
+          [disabled]="form.invalid"
+        >
           Save
         </button>
 
-        <a mat-button routerLink="/products">Cancel</a>
+
+        <a
+          mat-button
+          routerLink="/products"
+        >
+          Cancel
+        </a>
+
       </div>
+
     </form>
+
   </mat-card-content>
+
 </mat-card>
