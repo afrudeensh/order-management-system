@@ -106,9 +106,21 @@
         <span class="status" [attr.data-status]="order.status">{{ order.status }}</span>
        @if (auth.isAdmin()) {
           ·
-         <span [title]="customers()[order.userId]?.email ?? ''">
-           {{ customerName(order.userId) }}
-         </span>
+         <span class="cust" tabindex="0">
+    <span class="cust-name">{{ customerName(order.userId) | titlecase }}</span>
+
+    @if (customers()[order.userId]; as c) {
+      <span class="cust-card" role="tooltip">
+        <span class="cust-avatar">{{ c.name.charAt(0) }}</span>
+
+        <span class="cust-info">
+          <strong>{{ c.name | titlecase }}</strong>
+          <span class="cust-email">{{ c.email }}</span>
+          <span class="cust-id">Customer ID: {{ c.id }}</span>
+        </span>
+      </span>
+    }
+  </span>
       }
         · {{ order.createdAt | date: 'medium' }}
       </mat-card-subtitle>

@@ -550,6 +550,94 @@ input[type="color"]::-moz-color-swatch {
   color: #b91c1c;
 }
 
+/* ---------- Customer hover card (admin orders) ---------- */
+.cust {
+  position: relative;
+  display: inline-block;
+  cursor: default;
+  outline: none;
+}
+
+.cust-name {
+  font-weight: 600;
+  border-bottom: 1px dotted var(--muted);
+}
+
+.cust-card {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  z-index: 30;
+  align-items: center;
+  gap: 12px;
+  min-width: 240px;
+  max-width: 80vw;
+  padding: 12px 14px;
+  background: #fff;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+/* small arrow pointing at the name */
+.cust-card::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 18px;
+  width: 10px;
+  height: 10px;
+  background: #fff;
+  border-left: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
+  transform: rotate(45deg);
+}
+
+/* invisible bridge so the card doesn't vanish while the mouse crosses the gap */
+.cust-card::after {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 12px;
+}
+
+.cust:hover .cust-card,
+.cust:focus .cust-card,
+.cust:focus-within .cust-card {
+  display: flex;
+}
+
+.cust-avatar {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.cust-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.35;
+}
+
+.cust-email,
+.cust-id {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 
 /* ==========================================================================
    8. RESPONSIVE

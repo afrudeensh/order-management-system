@@ -1,5 +1,5 @@
 import { Component, inject, signal, viewChild } from '@angular/core';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, TitleCasePipe } from '@angular/common';
 import {
   FormBuilder,
   FormGroupDirective,
@@ -29,6 +29,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
     ReactiveFormsModule,
     CurrencyPipe,
     DatePipe,
+    TitleCasePipe,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
