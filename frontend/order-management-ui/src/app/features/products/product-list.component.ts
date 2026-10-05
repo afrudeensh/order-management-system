@@ -78,8 +78,8 @@ export class ProductListComponent {
   error = signal('');
 
   cols = this.auth.isAdmin()
-    ? ['image', 'name', 'color', 'price', 'stock', 'actions']
-    : ['image', 'name', 'color', 'price', 'stock'];
+    ? ['image', 'color', 'name', 'price', 'stock', 'actions']
+    : ['image', 'color', 'name', 'price', 'stock'];
 
   private reload = new Subject<void>();
 
